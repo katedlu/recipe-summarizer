@@ -1,9 +1,16 @@
 import React from 'react';
 
+interface IngredientGroup {
+  purpose: string;
+  ingredients: string[];
+}
+
 interface Recipe {
   title: string;
   ingredients: string[];
+  ingredient_groups?: IngredientGroup[];
   instructions: string[];
+  equipment?: string[];
   total_time?: number;
   prep_time?: number;
   cook_time?: number;
@@ -46,8 +53,58 @@ const App: React.FC = () => {
     }
   };
 
+  const renderIngredients = () => {
+    if (!recipe) return null;
+
+    // If we have ingredient groups, use those; otherwise fall back to regular ingredients
+    if (recipe.ingredient_groups && recipe.ingredient_groups.length > 0) {
+      return (
+        <div>
+          <h3 style={{ color: '#333', borderBottom: '2px solid #007bff', paddingBottom: '5px' }}>
+            Ingredients:
+          </h3>
+          {recipe.ingredient_groups.map((group, groupIndex) => (
+            <div key={groupIndex} style={{ marginBottom: '20px' }}>
+              {group.purpose && (
+                <h4 style={{ 
+                  color: '#555', 
+                  fontSize: '16px', 
+                  marginBottom: '10px',
+                  fontStyle: 'italic',
+                  borderLeft: '3px solid #007bff',
+                  paddingLeft: '10px'
+                }}>
+                  {group.purpose}
+                </h4>
+              )}
+              <ul style={{ paddingLeft: '20px', lineHeight: '1.6', marginTop: '5px' }}>
+                {group.ingredients.map((ingredient, index) => (
+                  <li key={index} style={{ marginBottom: '5px' }}>{ingredient}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      // Fallback to regular ingredients list
+      return (
+        <div>
+          <h3 style={{ color: '#333', borderBottom: '2px solid #007bff', paddingBottom: '5px' }}>
+            Ingredients:
+          </h3>
+          <ul style={{ paddingLeft: '20px', lineHeight: '1.6' }}>
+            {recipe.ingredients.map((ingredient, index) => (
+              <li key={index} style={{ marginBottom: '5px' }}>{ingredient}</li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+  };
+
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
       <h1>Recipe Summarizer</h1>
       
       <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
@@ -164,18 +221,39 @@ const App: React.FC = () => {
               </div>
             )}
           </div>
+
+          {recipe.equipment && recipe.equipment.length > 0 && (
+            <div style={{ marginBottom: '30px' }}>
+              <h3 style={{ color: '#333', borderBottom: '2px solid #6f42c1', paddingBottom: '5px' }}>
+                Equipment Needed:
+              </h3>
+              <div style={{ 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                gap: '10px',
+                marginTop: '10px'
+              }}>
+                {recipe.equipment.map((item, index) => (
+                  <span 
+                    key={index}
+                    style={{ 
+                      padding: '6px 12px',
+                      backgroundColor: '#f8f9fa',
+                      border: '1px solid #dee2e6',
+                      borderRadius: '20px',
+                      fontSize: '14px',
+                      color: '#495057'
+                    }}
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
-            <div>
-              <h3 style={{ color: '#333', borderBottom: '2px solid #007bff', paddingBottom: '5px' }}>
-                Ingredients:
-              </h3>
-              <ul style={{ paddingLeft: '20px', lineHeight: '1.6' }}>
-                {recipe.ingredients.map((ingredient, index) => (
-                  <li key={index} style={{ marginBottom: '5px' }}>{ingredient}</li>
-                ))}
-              </ul>
-            </div>
+            {renderIngredients()}
             
             <div>
               <h3 style={{ color: '#333', borderBottom: '2px solid #28a745', paddingBottom: '5px' }}>

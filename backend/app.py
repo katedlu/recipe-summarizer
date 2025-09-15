@@ -12,10 +12,28 @@ def parse_recipe(url):
         # Use recipe-scrapers to scrape the recipe
         scraper = scrape_me(url)
         
+        # Try to get equipment - this method may not be available for all scrapers
+        equipment = []
+        try:
+            equipment = scraper.equipment() or []
+        except (AttributeError, NotImplementedError):
+            # Equipment method might not be implemented for all sites
+            equipment = []
+        
+        # Try to get ingredient groups
+        ingredient_groups = []
+        try:
+            ingredient_groups = scraper.ingredient_groups() or []
+        except (AttributeError, NotImplementedError):
+            # Ingredient groups method might not be implemented for all sites
+            ingredient_groups = []
+        
         return {
             'title': scraper.title() or 'Unknown Recipe',
             'ingredients': scraper.ingredients() or [],
+            'ingredient_groups': ingredient_groups,
             'instructions': scraper.instructions_list() or [],
+            'equipment': equipment,
             'total_time': scraper.total_time() or None,
             'prep_time': scraper.prep_time() or None,
             'cook_time': scraper.cook_time() or None,
