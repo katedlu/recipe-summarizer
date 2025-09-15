@@ -59,27 +59,18 @@ const App: React.FC = () => {
     // If we have ingredient groups, use those; otherwise fall back to regular ingredients
     if (recipe.ingredient_groups && recipe.ingredient_groups.length > 0) {
       return (
-        <div>
-          <h3 style={{ color: '#333', borderBottom: '2px solid #007bff', paddingBottom: '5px' }}>
-            Ingredients:
-          </h3>
+        <div className="ingredients-section">
+          <h3 className="ingredients-title">Ingredients:</h3>
           {recipe.ingredient_groups.map((group, groupIndex) => (
-            <div key={groupIndex} style={{ marginBottom: '20px' }}>
+            <div key={groupIndex} className="ingredient-group">
               {group.purpose && (
-                <h4 style={{ 
-                  color: '#555', 
-                  fontSize: '16px', 
-                  marginBottom: '10px',
-                  fontStyle: 'italic',
-                  borderLeft: '3px solid #007bff',
-                  paddingLeft: '10px'
-                }}>
+                <h4 className="ingredient-group-purpose">
                   {group.purpose}
                 </h4>
               )}
-              <ul style={{ paddingLeft: '20px', lineHeight: '1.6', marginTop: '5px' }}>
+              <ul className="ingredients-list">
                 {group.ingredients.map((ingredient, index) => (
-                  <li key={index} style={{ marginBottom: '5px' }}>{ingredient}</li>
+                  <li key={index} className="ingredient-item">{ingredient}</li>
                 ))}
               </ul>
             </div>
@@ -89,13 +80,11 @@ const App: React.FC = () => {
     } else {
       // Fallback to regular ingredients list
       return (
-        <div>
-          <h3 style={{ color: '#333', borderBottom: '2px solid #007bff', paddingBottom: '5px' }}>
-            Ingredients:
-          </h3>
-          <ul style={{ paddingLeft: '20px', lineHeight: '1.6' }}>
+        <div className="ingredients-section">
+          <h3 className="ingredients-title">Ingredients:</h3>
+          <ul className="ingredients-list">
             {recipe.ingredients.map((ingredient, index) => (
-              <li key={index} style={{ marginBottom: '5px' }}>{ingredient}</li>
+              <li key={index} className="ingredient-item">{ingredient}</li>
             ))}
           </ul>
         </div>
@@ -104,12 +93,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h1>Recipe Summarizer</h1>
+    <div className="app-container">
+      <h1 className="app-title">Recipe Summarizer</h1>
       
-      <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="url">Recipe URL:</label>
+      <form onSubmit={handleSubmit} className="recipe-form">
+        <div className="form-group">
+          <label htmlFor="url" className="form-label">Recipe URL:</label>
           <input
             type="url"
             id="url"
@@ -117,134 +106,73 @@ const App: React.FC = () => {
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://example.com/recipe"
             required
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              marginTop: '5px',
-              fontSize: '16px'
-            }}
+            className="url-input"
           />
         </div>
         <button 
           type="submit" 
           disabled={loading}
-          style={{ 
-            padding: '10px 20px', 
-            fontSize: '16px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer'
-          }}
+          className="submit-button"
         >
           {loading ? 'Parsing...' : 'Parse Recipe'}
         </button>
       </form>
 
       {error && (
-        <div style={{ color: 'red', marginBottom: '20px' }}>
+        <div className="error-message">
           Error: {error}
         </div>
       )}
 
       {recipe && (
-        <div>
+        <div className="recipe-container">
           {recipe.image && (
-            <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+            <div className="recipe-image-container">
               <img 
                 src={recipe.image} 
                 alt={recipe.title}
-                style={{ 
-                  maxWidth: '100%', 
-                  height: 'auto', 
-                  maxHeight: '300px',
-                  borderRadius: '8px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}
+                className="recipe-image"
               />
             </div>
           )}
           
-          <h2 style={{ color: '#333', marginBottom: '10px' }}>{recipe.title}</h2>
+          <h2 className="recipe-title">{recipe.title}</h2>
           
           {recipe.host && (
-            <p style={{ color: '#666', fontSize: '14px', marginBottom: '15px' }}>
+            <p className="recipe-source">
               Source: {recipe.host}
             </p>
           )}
           
-          <div style={{ 
-            display: 'flex', 
-            gap: '20px', 
-            marginBottom: '20px',
-            flexWrap: 'wrap'
-          }}>
+          <div className="recipe-info">
             {recipe.prep_time && (
-              <div style={{ 
-                padding: '8px 12px', 
-                backgroundColor: '#f0f8ff', 
-                borderRadius: '4px',
-                fontSize: '14px'
-              }}>
+              <div className="info-badge prep-time">
                 <strong>Prep Time:</strong> {recipe.prep_time} minutes
               </div>
             )}
             {recipe.cook_time && (
-              <div style={{ 
-                padding: '8px 12px', 
-                backgroundColor: '#fff5ee', 
-                borderRadius: '4px',
-                fontSize: '14px'
-              }}>
+              <div className="info-badge cook-time">
                 <strong>Cook Time:</strong> {recipe.cook_time} minutes
               </div>
             )}
             {recipe.total_time && (
-              <div style={{ 
-                padding: '8px 12px', 
-                backgroundColor: '#f0fff0', 
-                borderRadius: '4px',
-                fontSize: '14px'
-              }}>
+              <div className="info-badge total-time">
                 <strong>Total Time:</strong> {recipe.total_time} minutes
               </div>
             )}
             {recipe.yields && (
-              <div style={{ 
-                padding: '8px 12px', 
-                backgroundColor: '#fff8dc', 
-                borderRadius: '4px',
-                fontSize: '14px'
-              }}>
+              <div className="info-badge serves">
                 <strong>Serves:</strong> {recipe.yields}
               </div>
             )}
           </div>
 
           {recipe.equipment && recipe.equipment.length > 0 && (
-            <div style={{ marginBottom: '30px' }}>
-              <h3 style={{ color: '#333', borderBottom: '2px solid #6f42c1', paddingBottom: '5px' }}>
-                Equipment Needed:
-              </h3>
-              <div style={{ 
-                display: 'flex', 
-                flexWrap: 'wrap', 
-                gap: '10px',
-                marginTop: '10px'
-              }}>
+            <div className="equipment-section">
+              <h3 className="equipment-title">Equipment Needed:</h3>
+              <div className="equipment-list">
                 {recipe.equipment.map((item, index) => (
-                  <span 
-                    key={index}
-                    style={{ 
-                      padding: '6px 12px',
-                      backgroundColor: '#f8f9fa',
-                      border: '1px solid #dee2e6',
-                      borderRadius: '20px',
-                      fontSize: '14px',
-                      color: '#495057'
-                    }}
-                  >
+                  <span key={index} className="equipment-item">
                     {item}
                   </span>
                 ))}
@@ -252,16 +180,14 @@ const App: React.FC = () => {
             </div>
           )}
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+          <div className="recipe-content">
             {renderIngredients()}
             
-            <div>
-              <h3 style={{ color: '#333', borderBottom: '2px solid #28a745', paddingBottom: '5px' }}>
-                Instructions:
-              </h3>
-              <ol style={{ paddingLeft: '20px', lineHeight: '1.6' }}>
+            <div className="instructions-section">
+              <h3 className="instructions-title">Instructions:</h3>
+              <ol className="instructions-list">
                 {recipe.instructions.map((instruction, index) => (
-                  <li key={index} style={{ marginBottom: '10px' }}>{instruction}</li>
+                  <li key={index} className="instruction-item">{instruction}</li>
                 ))}
               </ol>
             </div>
