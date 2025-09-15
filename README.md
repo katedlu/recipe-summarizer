@@ -48,13 +48,40 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Set up the frontend:
+3. Set up the frontend and root dependencies:
 ```bash
-cd ../frontend
+# Install root dependencies (concurrently)
+npm install
+
+# Install frontend dependencies
+cd frontend
 npm install
 ```
 
+Alternatively, you can use the shorthand command from the root directory:
+```bash
+npm run install-all
+```
+
 ### Running the Application
+
+You can run both the frontend and backend with a single command from the root directory:
+
+```bash
+npm install  # First time only, to install concurrently
+npm start
+```
+
+Or from the frontend directory:
+
+```bash
+cd frontend
+npm start
+```
+
+Both methods will start the React frontend (on port 3000) and the Flask backend (on port 5000) concurrently.
+
+Alternatively, you can run them separately:
 
 1. Start the backend server:
 ```bash
@@ -66,7 +93,7 @@ python app.py
 2. Start the frontend development server:
 ```bash
 cd frontend
-npm start
+npm run start-frontend
 ```
 
 3. Open your browser and navigate to `http://localhost:3000`
