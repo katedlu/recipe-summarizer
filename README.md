@@ -21,6 +21,27 @@ A web application that extracts and displays recipe information from cooking web
 - recipe-scrapers library for parsing
 - CORS enabled for frontend communication
 
+## Project Structure
+
+```
+recipe-summarizer/
+├── README.md
+├── .gitignore
+├── backend/
+│   ├── app.py                 # Flask server
+│   ├── requirements.txt       # Python dependencies
+│   └── venv/                  # Python virtual environment
+└── frontend/
+    ├── package.json           # Node.js dependencies
+    ├── package-lock.json      # Dependency lock file
+    ├── public/                # Static assets
+    ├── src/
+    │   ├── App.tsx           # Main React component
+    │   ├── App.css           # Application styles
+    │   └── ...               # Other React files
+    └── ...
+```
+
 ## Getting Started
 
 ### Prerequisites
@@ -48,38 +69,22 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Set up the frontend and root dependencies:
+3. Set up the frontend:
 ```bash
-# Install root dependencies (concurrently)
-npm install
-
-# Install frontend dependencies
 cd frontend
 npm install
-```
-
-Alternatively, you can use the shorthand command from the root directory:
-```bash
-npm run install-all
 ```
 
 ### Running the Application
 
-You can run both the frontend and backend with a single command from the root directory:
-
-```bash
-npm install  # First time only, to install concurrently
-npm start
-```
-
-Or from the frontend directory:
+To run both the frontend and backend concurrently:
 
 ```bash
 cd frontend
 npm start
 ```
 
-Both methods will start the React frontend (on port 3000) and the Flask backend (on port 5000) concurrently.
+This will start both the React frontend (on port 3000) and the Flask backend (on port 5000) using a single command.
 
 Alternatively, you can run them separately:
 

@@ -19,7 +19,7 @@
   },
   "scripts": {
     "start-frontend": "react-scripts start",
-    "start-backend": "cd ../backend && pwsh -Command \"& {.\\venv\\Scripts\\Activate.ps1; python app.py}\"",
+    "start-backend": "cd ../backend && powershell -Command \"& {.\\venv\\Scripts\\Activate.ps1; python app.py}\"",
     "start": "concurrently \"npm run start-frontend\" \"npm run start-backend\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
