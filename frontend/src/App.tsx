@@ -3,6 +3,7 @@ import './styles/App.css';
 import RecipeForm from './components/RecipeForm';
 import RecipeCard from './components/RecipeCard';
 import JsonInfo from './components/JsonInfo';
+import recipeasyLogo from './media/recipeasy.png';
 import type { Recipe } from './types/recipe.types';
 
 const App: React.FC = () => {
@@ -41,7 +42,10 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
-      <h1 className="app-title">Recipe Summarizer</h1>
+      <header className="app-header">
+        <img src={recipeasyLogo} alt="Recipeasy Logo" className="app-logo" />
+        <h1 className="app-title">Recipeasy</h1>
+      </header>
       
       <RecipeForm 
         url={url}

@@ -1,23 +1,56 @@
 /* Global App Styles */
+:root {
+  /* Color palette based on recipeasy.png dark green and beige */
+  --primary-color: #2A5D3C; /* Dark green from logo */
+  --secondary-color: #E8D9B5; /* Beige/tan from logo */
+  --accent-color: #F9F3E5; /* Lighter beige for backgrounds */
+  --dark-color: #1A3C27; /* Darker green */
+  --light-color: #FBF9F2; /* Off-white background */
+  --error-color: #D64545; /* Red for errors, not from logo but complementary */
+}
+
+body {
+  background-color: var(--light-color);
+  color: var(--dark-color);
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
 .app-container {
   padding: 20px;
   max-width: 1000px;
   margin: 0 auto;
 }
 
+.app-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.app-logo {
+  height: 60px;
+  margin-right: 15px;
+}
+
 .app-title {
-  color: #333;
-  margin-bottom: 20px;
+  color: var(--primary-color);
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 600;
 }
 
 /* Error Styles */
 .error-message {
-  color: red;
+  color: white;
   margin-bottom: 20px;
-  padding: 10px;
-  background-color: #fff5f5;
-  border: 1px solid #fed7d7;
-  border-radius: 4px;
+  padding: 15px;
+  background-color: var(--error-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive Design */
@@ -26,10 +59,26 @@
     padding: 15px;
     max-width: 100%;
   }
+  
+  .app-logo {
+    height: 50px;
+  }
+  
+  .app-title {
+    font-size: 2rem;
+  }
 }
 
 @media (max-width: 480px) {
   .app-container {
     padding: 10px;
+  }
+  
+  .app-logo {
+    height: 40px;
+  }
+  
+  .app-title {
+    font-size: 1.8rem;
   }
 }
