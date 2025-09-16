@@ -59,7 +59,7 @@ jobs:
             az webapp config set \
               --resource-group ${{ env.RESOURCE_GROUP }} \
               --name ${{ env.APP_SERVICE_NAME }} \
-              --startup-command "gunicorn --bind=0.0.0.0 --timeout 600 startup:app"
+              --startup-file "gunicorn --bind=0.0.0.0 --timeout 600 startup:app"
 
       - name: Configure CORS
         uses: azure/CLI@v1
