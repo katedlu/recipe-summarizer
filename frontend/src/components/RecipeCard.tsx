@@ -19,24 +19,19 @@ const RecipeCard: React.FC<RecipeCardProps> = (props) => (
         title={props.recipe.title}
       />
     )}
-    
     <h2 className="recipe-card__title">{props.recipe.title}</h2>
-    
     {props.recipe.host && (
       <p className="recipe-card__source">
         Source: {props.recipe.host}
       </p>
     )}
-    
     <RecipeInfo 
       prepTime={props.recipe.prep_time}
       cookTime={props.recipe.cook_time}
       totalTime={props.recipe.total_time}
       yields={props.recipe.yields}
     />
-
     <Equipment equipment={props.recipe.equipment || []} />
-    
     <div className="recipe-card__content">
       <Ingredients 
         ingredients={props.recipe.ingredients}

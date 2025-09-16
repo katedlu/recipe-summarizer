@@ -1,9 +1,9 @@
 import React from 'react';
 import '../styles/Badge.css';
 
-export type BadgeVariant = 'prep-time' | 'cook-time' | 'total-time' | 'serves';
+type BadgeVariant = 'prep-time' | 'cook-time' | 'total-time' | 'serves';
 
-type BadgeProps = {
+export type BadgeProps = {
   label: string;
   value: string | number;
   variant: BadgeVariant;

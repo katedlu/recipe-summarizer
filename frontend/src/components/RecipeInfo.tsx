@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import Badge, { type BadgeVariant } from './Badge';
+import Badge, { type BadgeProps } from './Badge';
 import '../styles/RecipeInfo.css';
 
 type RecipeInfoProps = {
@@ -9,11 +9,8 @@ type RecipeInfoProps = {
   yields?: string;
 };
 
-type BadgeConfig = {
+type BadgeConfig = BadgeProps & {
   renderCondition: boolean;
-  label: string;
-  value: string;
-  variant: BadgeVariant;
 };
 
 const RecipeInfo: React.FC<RecipeInfoProps> = (props) => {
@@ -55,12 +52,7 @@ const RecipeInfo: React.FC<RecipeInfoProps> = (props) => {
   return (
     <div className="recipe-info">
       {visibleBadges.map((badge) => (
-        <Badge 
-          key={badge.variant}
-          label={badge.label}
-          value={badge.value}
-          variant={badge.variant}
-        />
+        <Badge {...badge} />
       ))}
     </div>
   );
