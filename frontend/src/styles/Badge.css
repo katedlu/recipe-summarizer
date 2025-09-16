@@ -1,0 +1,35 @@
+/* Badge Component Styles */
+.badge {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.badge--prep-time {
+  background-color: #f0f8ff;
+  color: #0066cc;
+}
+
+.badge--cook-time {
+  background-color: #fff5ee;
+  color: #cc6600;
+}
+
+.badge--total-time {
+  background-color: #f0fff0;
+  color: #009900;
+}
+
+.badge--serves {
+  background-color: #fff8dc;
+  color: #cc9900;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .badge {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
