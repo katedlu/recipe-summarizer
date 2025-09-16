@@ -1,0 +1,67 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'  # Only trigger when frontend files change
+  workflow_dispatch:  # Allows manual triggering
+
+env:
+  RESOURCE_GROUP: recipe-summarizer-rg
+  LOCATION: westus
+  STORAGE_ACCOUNT: recipesummarizer
+  NODE_VERSION: '18'
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy frontend to Azure Storage
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            # Get storage account key
+            STORAGE_KEY=$(az storage account keys list --resource-group ${{ env.RESOURCE_GROUP }} --account-name ${{ env.STORAGE_ACCOUNT }} --query "[0].value" -o tsv)
+            
+            # Upload frontend files
+            az storage blob upload-batch \
+              --account-name ${{ env.STORAGE_ACCOUNT }} \
+              --account-key "$STORAGE_KEY" \
+              --source "frontend/dist" \
+              --destination '$web' \
+              --overwrite
+
+      - name: Get frontend URL
+        run: |
+          FRONTEND_URL=$(az storage account show \
+            --name ${{ env.STORAGE_ACCOUNT }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "primaryEndpoints.web" \
+            --output tsv)
+          echo "Frontend deployed to: $FRONTEND_URL"
