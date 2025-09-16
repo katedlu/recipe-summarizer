@@ -15,4 +15,5 @@ export type Recipe = {
   yields?: string;
   image?: string;
   host?: string;
+  raw_json?: any;
 };

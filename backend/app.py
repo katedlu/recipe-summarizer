@@ -28,6 +28,13 @@ def parse_recipe(url):
             # Ingredient groups method might not be implemented for all sites
             ingredient_groups = []
         
+        # Get raw JSON data from recipe-scrapers
+        raw_json = None
+        try:
+            raw_json = scraper.to_json()
+        except (AttributeError, NotImplementedError):
+            raw_json = None
+
         return {
             'title': scraper.title() or 'Unknown Recipe',
             'ingredients': scraper.ingredients() or [],
@@ -39,7 +46,8 @@ def parse_recipe(url):
             'cook_time': scraper.cook_time() or None,
             'yields': scraper.yields() or None,
             'image': scraper.image() or None,
-            'host': scraper.host() or None
+            'host': scraper.host() or None,
+            'raw_json': raw_json
         }
         
     except Exception as e:

@@ -2,6 +2,7 @@ import React from 'react';
 import './styles/App.css';
 import RecipeForm from './components/RecipeForm';
 import RecipeCard from './components/RecipeCard';
+import JsonInfo from './components/JsonInfo';
 import type { Recipe } from './types/recipe.types';
 
 const App: React.FC = () => {
@@ -56,6 +57,7 @@ const App: React.FC = () => {
       )}
 
       {recipe && <RecipeCard recipe={recipe} />}
+      {recipe && recipe.raw_json && <JsonInfo jsonData={recipe.raw_json} />}
     </div>
   );
 };
