@@ -1,7 +1,15 @@
 
+import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from recipe_scrapers import scrape_me
+import os
+import uuid
+
+# Create a deployment ID and timestamp when the app starts
+DEPLOYMENT_ID = str(uuid.uuid4())[:8]  # Short UUID for readability
+DEPLOYMENT_TIME = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+VERSION = "1.0.0"  # You can update this manually when making major changes
 
 app = Flask(__name__)
 CORS(app)
@@ -55,7 +63,14 @@ def parse_recipe(url):
 
 @app.route('/')
 def index():
-    return 'Backend is running!'
+    return jsonify({
+        'status': 'Online',
+        'message': 'Recipe Summarizer Backend',
+        'version': VERSION,
+        'deployment_id': DEPLOYMENT_ID,
+        'deployed_at': DEPLOYMENT_TIME,
+        'environment': os.environ.get('FLASK_ENV', 'production')
+    })
 
 @app.route('/api/hello')
 def hello():
