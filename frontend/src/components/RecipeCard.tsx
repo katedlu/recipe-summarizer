@@ -1,9 +1,9 @@
 import React from 'react';
 import RecipeInfo from './RecipeInfo';
 import Equipment from './Equipment';
-import Ingredients from './Ingredients';
 import Instructions from './Instructions';
 import RecipeImage from './RecipeImage';
+import RecipeTable from './RecipeTable';
 import type { Recipe } from '../types/recipe.types';
 import '../styles/RecipeCard.css';
 
@@ -33,10 +33,7 @@ const RecipeCard: React.FC<RecipeCardProps> = (props) => (
     />
     <Equipment equipment={props.recipe.equipment || []} />
     <div className="recipe-card__content">
-      <Ingredients 
-        ingredients={props.recipe.ingredients}
-        ingredientGroups={props.recipe.ingredient_groups}
-      />
+      <RecipeTable recipe={props.recipe} />
       
       <Instructions instructions={props.recipe.instructions} />
     </div>

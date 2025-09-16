@@ -19,7 +19,7 @@ const App: React.FC = () => {
     setRecipe(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/parse-recipe', {
+      const response = await fetch('http://localhost:5001/api/parse-recipe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,8 +46,8 @@ const App: React.FC = () => {
         <img src={recipeasyLogo} alt="Recipeasy Logo" className="app-logo" />
         <h1 className="app-title">Recipeasy</h1>
       </header>
-      
-      <RecipeForm 
+
+      <RecipeForm
         url={url}
         setUrl={setUrl}
         onSubmit={handleSubmit}

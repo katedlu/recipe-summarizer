@@ -1,0 +1,59 @@
+.recipe-table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+.recipe-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-table th,
+.recipe-table td {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.recipe-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+.group-column {
+  width: 120px;
+}
+
+.ingredient-column {
+  width: 200px;
+}
+
+.step-column {
+  width: 80px;
+  min-width: 80px;
+}
+
+.group-cell {
+  background-color: #f8f8f8;
+  font-weight: 500;
+}
+
+.ingredient-cell {
+  font-weight: normal;
+}
+
+.step-cell {
+  text-align: center;
+  font-size: 18px;
+  color: #ccc;
+}
+
+.step-cell.used {
+  color: #2196F3;
+  background-color: #E3F2FD;
+}
