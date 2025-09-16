@@ -1,0 +1,13 @@
+/* RecipeImage Component Styles */
+.recipe-image {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.recipe-image__img {
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
