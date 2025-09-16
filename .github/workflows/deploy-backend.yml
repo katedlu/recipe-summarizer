@@ -55,11 +55,18 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            # Set the startup command
+            # Set the startup command - correct parameter for setting startup command
+            az webapp config appsettings set \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --name ${{ env.APP_SERVICE_NAME }} \
+              --settings WEBSITES_PORT=8000 PYTHON_ENABLE_GUNICORN_MULTIWORKERS=1
+            
+            # Apply startup command
             az webapp config set \
               --resource-group ${{ env.RESOURCE_GROUP }} \
               --name ${{ env.APP_SERVICE_NAME }} \
-              --startup-file "gunicorn --bind=0.0.0.0 --timeout 600 startup:app"
+              --linux-fx-version "PYTHON|3.10" \
+              --generic-configurations "{'appCommandLine': 'gunicorn --bind=0.0.0.0 --timeout 600 startup:app'}"
 
       - name: Configure CORS
         uses: azure/CLI@v1
