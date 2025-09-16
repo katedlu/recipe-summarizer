@@ -1,0 +1,30 @@
+/* Ingredients Component Styles */
+.ingredients__title {
+  color: #333;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+}
+
+.ingredients__group {
+  margin-bottom: 20px;
+}
+
+.ingredients__group-purpose {
+  color: #555;
+  font-size: 16px;
+  margin-bottom: 10px;
+  font-style: italic;
+  border-left: 3px solid #007bff;
+  padding-left: 10px;
+}
+
+.ingredients__list {
+  padding-left: 20px;
+  line-height: 1.6;
+  margin-top: 5px;
+}
+
+.ingredients__item {
+  margin-bottom: 5px;
+}

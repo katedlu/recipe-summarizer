@@ -1,0 +1,39 @@
+/* Equipment Component Styles */
+.equipment {
+  margin-bottom: 30px;
+}
+
+.equipment__title {
+  color: #333;
+  border-bottom: 2px solid #6f42c1;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.equipment__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.equipment__item {
+  padding: 6px 12px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #495057;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .equipment__list {
+    gap: 8px;
+  }
+  
+  .equipment__item {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+}

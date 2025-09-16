@@ -1,0 +1,35 @@
+/* Global App Styles */
+.app-container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.app-title {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Error Styles */
+.error-message {
+  color: red;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 15px;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    padding: 10px;
+  }
+}
