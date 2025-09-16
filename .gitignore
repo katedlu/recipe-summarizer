@@ -21,6 +21,8 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 
+*.zip
+
 # IDE and Editor files
 .vscode/
 .idea/

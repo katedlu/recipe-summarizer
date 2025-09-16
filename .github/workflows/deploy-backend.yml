@@ -1,0 +1,102 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'  # Only trigger when backend files change
+  workflow_dispatch:  # Allows manual triggering
+
+env:
+  RESOURCE_GROUP: recipe-summarizer-rg
+  LOCATION: westus
+  APP_SERVICE_NAME: recipe-summarizer-backend
+  PYTHON_VERSION: '3.10'
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: 'backend/requirements.txt'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create deployment package
+        run: |
+          cd backend
+          # Ensure the required Azure deployment files exist
+          echo "Creating deployment package..."
+          zip -r ../backend_deploy.zip .
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.APP_SERVICE_NAME }}
+          package: backend_deploy.zip
+
+      - name: Configure startup command
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            # Set the startup command
+            az webapp config set \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --name ${{ env.APP_SERVICE_NAME }} \
+              --startup-command "gunicorn --bind=0.0.0.0 --timeout 600 startup:app"
+
+      - name: Configure CORS
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            # Get frontend URL for CORS
+            FRONTEND_URL=$(az storage account show \
+              --name recipesummarizer \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --query "primaryEndpoints.web" \
+              --output tsv | sed 's/\/$//')
+            
+            # Enable CORS for frontend
+            echo "Setting CORS for $FRONTEND_URL"
+            az webapp cors add \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --name ${{ env.APP_SERVICE_NAME }} \
+              --allowed-origins "$FRONTEND_URL"
+
+      - name: Configure logging
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            # Enable logging
+            az webapp log config \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --name ${{ env.APP_SERVICE_NAME }} \
+              --application-logging filesystem \
+              --detailed-error-messages true \
+              --failed-request-tracing true \
+              --web-server-logging filesystem
+
+      - name: Get backend URL
+        run: |
+          BACKEND_URL=$(az webapp show \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name ${{ env.APP_SERVICE_NAME }} \
+            --query "defaultHostName" \
+            --output tsv)
+          echo "Backend deployed to: https://$BACKEND_URL"

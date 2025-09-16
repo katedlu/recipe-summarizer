@@ -1,0 +1,13 @@
+# Python 3.10 runtime
+[python]
+version = 3.10
+
+# Gunicorn configuration
+[gunicorn]
+command = "gunicorn --bind=0.0.0.0 --timeout 600 startup:app"
+
+# Install steps
+[build]
+commands = [
+    "pip install -r requirements.txt"
+]

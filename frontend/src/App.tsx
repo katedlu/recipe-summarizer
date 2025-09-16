@@ -4,6 +4,7 @@ import RecipeForm from './components/RecipeForm';
 import RecipeCard from './components/RecipeCard';
 import JsonInfo from './components/JsonInfo';
 import recipeasyLogo from './media/recipeasy.png';
+import config from './config';
 import type { Recipe } from './types/recipe.types';
 
 const App: React.FC = () => {
@@ -19,7 +20,7 @@ const App: React.FC = () => {
     setRecipe(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/parse-recipe', {
+      const response = await fetch(`${config.apiUrl}/api/parse-recipe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
