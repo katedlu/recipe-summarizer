@@ -10,12 +10,52 @@ load_dotenv()
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from recipe_scrapers import scrape_me
+from urllib.parse import urlparse
 from llm_service import llm_service
 
 # Create a deployment ID and timestamp when the app starts
 DEPLOYMENT_ID = str(uuid.uuid4())[:8]  # Short UUID for readability
 DEPLOYMENT_TIME = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 VERSION = "1.0.0"  # You can update this manually when making major changes
+
+def format_recipe_scraper_error(error_message: str, url: str) -> str:
+    """
+    Format recipe-scrapers errors into user-friendly messages
+    """
+    error_lower = error_message.lower()
+    
+    # Extract domain from URL
+    try:
+        domain = urlparse(url).netloc
+        if domain.startswith('www.'):
+            domain = domain[4:]
+    except:
+        domain = "this website"
+    
+    # Check for common recipe-scrapers error patterns
+    if "preptime information not found in schemaorg" in error_lower:
+        return f"Sorry, we do not support scraping this website domain: {domain}"
+    elif "cooktime information not found in schemaorg" in error_lower:
+        return f"Sorry, we do not support scraping this website domain: {domain}"
+    elif "totaltime information not found in schemaorg" in error_lower:
+        return f"Sorry, we do not support scraping this website domain: {domain}"
+    elif "recipe information not found" in error_lower:
+        return f"Sorry, we do not support scraping this website domain: {domain}"
+    elif "schema.org" in error_lower and "not found" in error_lower:
+        return f"Sorry, we do not support scraping this website domain: {domain}"
+    elif "no recipe found" in error_lower:
+        return f"Sorry, no recipe was found on this page from {domain}"
+    elif "unsupported domain" in error_lower or "not supported" in error_lower:
+        return f"Sorry, we do not support scraping this website domain: {domain}"
+    elif "connection" in error_lower or "timeout" in error_lower:
+        return f"Unable to connect to {domain}. Please check the URL and try again."
+    elif "404" in error_message or "not found" in error_lower:
+        return f"The recipe page was not found at {domain}. Please check the URL."
+    elif "403" in error_message or "forbidden" in error_lower:
+        return f"Access to {domain} was denied. The website may be blocking automated requests."
+    else:
+        # For other errors, provide a generic but helpful message
+        return f"Sorry, we encountered an issue while trying to scrape the recipe from {domain}. This website may not be supported or the page format may have changed."
 
 app = Flask(__name__)
 CORS(app)
@@ -65,7 +105,9 @@ def parse_recipe(url):
         }
         
     except Exception as e:
-        raise Exception(f"Failed to parse recipe: {str(e)}")
+        # Format the error message for better user experience
+        formatted_error = format_recipe_scraper_error(str(e), url)
+        raise Exception(formatted_error)
 
 @app.route('/')
 def index():
