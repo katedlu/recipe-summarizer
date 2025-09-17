@@ -84,7 +84,7 @@ cd frontend
 npm start
 ```
 
-This will start both the React frontend (on port 3000) and the Flask backend (on port 5000) using a single command.
+This will start both the React frontend (on port 3000) and the Flask backend (on port 5001) using a single command.
 
 Alternatively, you can run them separately:
 

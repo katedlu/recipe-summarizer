@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/TableView.css';
 import config from '../config';
-import type { TableData } from '../types/recipe.types';
+import type { TableData, TableCell } from '../types/recipe.types';
 
 interface TableViewProps {
   rawJson: any;
@@ -101,11 +101,39 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
                   {tableData.table.rows.map((row, rowIndex) => (
                     <tr key={rowIndex} className={row.ingredient === "PREP TASKS" ? "prep-row" : "ingredient-row"}>
                       <td className="ingredient-cell">{row.ingredient}</td>
-                      {row.cells.map((cell, cellIndex) => (
-                        <td key={cellIndex} className="step-cell">
-                          {cell}
-                        </td>
-                      ))}
+                      {row.cells.map((cell: TableCell, cellIndex) => {
+                        // Handle different cell formats
+                        if (typeof cell === 'object' && cell !== null) {
+                          // Skip spanned cells - they don't render
+                          if (cell.spanned) {
+                            return null;
+                          }
+                          // Render cells with rowspan
+                          if (cell.rowspan) {
+                            return (
+                              <td 
+                                key={cellIndex} 
+                                className="step-cell"
+                                rowSpan={cell.rowspan}
+                              >
+                                {cell.text}
+                              </td>
+                            );
+                          }
+                          // Regular object format
+                          return (
+                            <td key={cellIndex} className="step-cell">
+                              {cell.text}
+                            </td>
+                          );
+                        }
+                        // Handle string format (backwards compatibility)
+                        return (
+                          <td key={cellIndex} className="step-cell">
+                            {cell as string}
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))}
                 </tbody>

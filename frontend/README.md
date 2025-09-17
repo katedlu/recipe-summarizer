@@ -10,7 +10,7 @@ In the project directory, you can run:
 
 Runs both the frontend and backend applications concurrently:
 - Frontend React app in development mode at [http://localhost:3000](http://localhost:3000)
-- Backend Flask server at [http://localhost:5000](http://localhost:5000)
+- Backend Flask server at [http://localhost:5001](http://localhost:5001)
 
 The page will reload if you make edits to the frontend code.
 You will also see any lint errors in the console.
@@ -23,7 +23,7 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 ### `npm run start-backend`
 
 Runs only the Python backend server.\
-The server will be available at [http://localhost:5000](http://localhost:5000).
+The server will be available at [http://localhost:5001](http://localhost:5001).
 This command automatically activates the Python virtual environment before starting the server.
 
 ### `npm test`
