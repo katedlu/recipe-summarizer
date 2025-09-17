@@ -1,11 +1,13 @@
 /* RecipeForm Component Styles */
 .recipe-form {
-  margin-bottom: 30px;
+  margin: 0 auto 30px auto;
   background-color: white;
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border: 1px solid var(--secondary-color);
+  max-width: 600px;
+  text-align: center;
 }
 
 .recipe-form__group {
@@ -16,6 +18,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
   color: var(--primary-color);
   font-size: 1.1rem;
 }
@@ -25,6 +28,7 @@
   padding: 14px;
   margin-top: 5px;
   font-size: 16px;
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
   border: 2px solid var(--secondary-color);
   border-radius: 8px;
   box-sizing: border-box;
@@ -42,6 +46,7 @@
   padding: 14px 28px;
   font-size: 16px;
   font-weight: 600;
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
   background-color: var(--primary-color);
   color: white;
   border: none;

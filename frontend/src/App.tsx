@@ -30,11 +30,14 @@ const App: React.FC = () => {
         body: JSON.stringify({ url }),
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Failed to parse recipe');
+        // Use the error message from the server response
+        const errorMessage = data.error || 'Failed to parse recipe';
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
       setRecipe(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -59,7 +62,7 @@ const App: React.FC = () => {
 
       {error && (
         <div className="error-message">
-          Error: {error}
+          {error}
         </div>
       )}
 

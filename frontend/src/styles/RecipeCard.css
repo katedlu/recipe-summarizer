@@ -37,11 +37,8 @@
 .recipe-image {
   width: 100%;
   height: auto;
-  border-radius: 8px;
   margin-bottom: 20px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  border: 3px solid var(--secondary-color);
   text-align: center;
 }
 
@@ -49,11 +46,6 @@
   width: auto;
   max-width: 100%;
   height: auto;
-  transition: transform 0.3s ease;
-}
-
-.recipe-image:hover img {
-  transform: scale(1.02);
 }
 
 /* Info, Equipment, Ingredients, Instructions Sections */
