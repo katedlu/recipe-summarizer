@@ -52,7 +52,7 @@ const RecipeInfo: React.FC<RecipeInfoProps> = (props) => {
   return (
     <div className="recipe-info">
       {visibleBadges.map((badge) => (
-        <Badge {...badge} />
+        <Badge key={badge.variant} {...badge} />
       ))}
     </div>
   );

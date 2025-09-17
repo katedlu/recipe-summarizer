@@ -3,12 +3,58 @@ import json
 from typing import Dict, Any, List
 from openai import AzureOpenAI
 import logging
+import re
 
 class LLMService:
     def __init__(self):
         # Initialize Azure Key Vault client and OpenAI client
         self.client = None
         self._initialize_openai_client()
+    
+    def _sanitize_unicode_data(self, data: Any) -> Any:
+        """
+        Recursively sanitize Unicode characters in data structures
+        """
+        if isinstance(data, dict):
+            return {key: self._sanitize_unicode_data(value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self._sanitize_unicode_data(item) for item in data]
+        elif isinstance(data, str):
+            # Replace common problematic Unicode characters with ASCII equivalents
+            replacements = {
+                '\u2153': '1/3',      # ⅓
+                '\u2154': '2/3',      # ⅔
+                '\u2155': '1/5',      # ⅕
+                '\u2156': '2/5',      # ⅖
+                '\u2157': '3/5',      # ⅗
+                '\u2158': '4/5',      # ⅘
+                '\u2159': '1/6',      # ⅙
+                '\u215a': '5/6',      # ⅚
+                '\u215b': '1/8',      # ⅛
+                '\u215c': '3/8',      # ⅜
+                '\u215d': '5/8',      # ⅝
+                '\u215e': '7/8',      # ⅞
+                '\u00bd': '1/2',      # ½
+                '\u00bc': '1/4',      # ¼
+                '\u00be': '3/4',      # ¾
+                '\u2013': '-',        # en dash
+                '\u2014': '-',        # em dash
+                '\u2018': "'",        # left single quotation mark
+                '\u2019': "'",        # right single quotation mark
+                '\u201c': '"',        # left double quotation mark
+                '\u201d': '"',        # right double quotation mark
+                '\u00b0': ' degrees', # degree symbol
+            }
+            
+            result = data
+            for unicode_char, replacement in replacements.items():
+                result = result.replace(unicode_char, replacement)
+            
+            # Remove any remaining non-ASCII characters that might cause issues
+            result = result.encode('ascii', 'ignore').decode('ascii')
+            return result
+        else:
+            return data
     
     def _initialize_openai_client(self):
         """
@@ -41,8 +87,11 @@ class LLMService:
         Use LLM to parse recipe JSON into a structured table format
         """
         try:
+            # Sanitize Unicode characters first
+            sanitized_json = self._sanitize_unicode_data(raw_json)
+            
             # Create a prompt for the LLM
-            prompt = self._create_table_parsing_prompt(raw_json)
+            prompt = self._create_table_parsing_prompt(sanitized_json)
             
             # Call Azure OpenAI API
             response = self.client.chat.completions.create(
@@ -98,7 +147,13 @@ class LLMService:
             }
         except Exception as e:
             error_message = str(e)
-            logging.error(f"LLM service error: {error_message}")
+            
+            # Handle Unicode encoding errors specifically
+            if 'charmap' in error_message and 'encode' in error_message:
+                logging.error(f"Unicode encoding error in LLM service: {error_message}")
+                error_message = "Unicode character encoding error. The recipe contains special characters that need to be processed differently."
+            else:
+                logging.error(f"LLM service error: {error_message}")
             
             # Provide more specific error information
             if "Connection error" in error_message or "connection" in error_message.lower():
@@ -120,7 +175,8 @@ class LLMService:
         """
         Create a prompt for the LLM to parse recipe data into table format
         """
-        json_str = json.dumps(raw_json, indent=2)
+        # Ensure Unicode characters are properly handled - data should already be sanitized
+        json_str = json.dumps(raw_json, indent=2, ensure_ascii=True)
         
         prompt = f"""
 Please analyze the following recipe JSON data and convert it into a cooking workflow table format.

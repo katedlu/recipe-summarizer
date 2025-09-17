@@ -5,5 +5,16 @@ export default defineConfig({
   plugins: [pluginReact()],
   html: {
     template: './public/index.html'
+  },
+  output: {
+    copy: [
+      {
+        from: 'public',
+        to: '.',
+        globOptions: {
+          ignore: ['**/index.html']
+        }
+      }
+    ]
   }
 });

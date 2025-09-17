@@ -131,7 +131,7 @@ def parse_to_table_endpoint():
     try:
         print(f"Attempting to parse recipe to table...")
         result = llm_service.parse_recipe_to_table(raw_json)
-        print(f"LLM service result: {result}")
+        print(f"LLM service result success: {result.get('success', False)}")
         
         if result['success']:
             return jsonify(result['table_data'])
@@ -139,8 +139,13 @@ def parse_to_table_endpoint():
             print(f"LLM service failed with error: {result['error']}")
             return jsonify({'error': result['error']}), 500
             
+    except UnicodeEncodeError as ue:
+        error_msg = f"Unicode encoding error: {str(ue)}"
+        print(error_msg)
+        return jsonify({'error': 'Recipe contains special characters that cannot be processed. Please try a different recipe.'}), 500
     except Exception as e:
-        print(f"Exception in parse_to_table_endpoint: {str(e)}")
+        error_msg = f"Exception in parse_to_table_endpoint: {str(e)}"
+        print(error_msg)
         return jsonify({'error': f'Failed to process request: {str(e)}'}), 500
 
 if __name__ == '__main__':
