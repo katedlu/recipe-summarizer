@@ -30,7 +30,7 @@ const RecipeForm: React.FC<RecipeFormProps> = (props) => (
     <button 
       type="submit" 
       disabled={props.loading}
-      className="recipe-form__submit-button"
+      className="button button--primary"
       aria-describedby={props.loading ? "loading-status" : undefined}
     >
       {props.loading ? 'Parsing...' : 'Parse Recipe'}

@@ -3,30 +3,7 @@
   width: 100%;
 }
 
-.json-toggle-button {
-  padding: 14px 28px;
-  font-size: 16px;
-  font-weight: 600;
-  font-family: 'DM Sans', 'Segoe UI', sans-serif;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(42, 93, 60, 0.3);
-}
-
-.json-toggle-button:hover {
-  background-color: var(--dark-color);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(42, 93, 60, 0.4);
-}
-
-.json-toggle-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(42, 93, 60, 0.3);
-}
+/* Button styles removed - now using global .button classes */
 
 .json-container {
   margin-top: 1rem;
@@ -80,11 +57,7 @@
 }
 
 @media (max-width: 768px) {
-  .json-toggle-button {
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
-  }
+  /* Button responsive styles now handled by global .button classes */
   
   .json-container {
     padding: 1rem;

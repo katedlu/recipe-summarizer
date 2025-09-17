@@ -209,7 +209,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
     <section className="table-view" aria-label="Recipe Workflow Table">
       <div className="table-controls">
         <button 
-          className="table-toggle-btn" 
+          className="button button--primary" 
           onClick={toggleTable}
           disabled={loading}
           aria-describedby={loading ? "table-loading-status" : undefined}
@@ -245,7 +245,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
           <div className="table-header">
             <h3 id="table-title">{tableData.title}</h3>
             <button 
-              className="save-image-btn" 
+              className="button button--secondary button--small" 
               onClick={saveAsImage}
               disabled={savingImage}
               aria-label="Save table as PNG image"

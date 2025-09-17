@@ -19,7 +19,7 @@ const JsonInfo: React.FC<JsonInfoProps> = ({ jsonData }) => {
   return (
     <section className="json-info" aria-label="Raw Recipe Data">
       <button 
-        className="json-toggle-button" 
+        className="button button--primary" 
         onClick={toggleJson}
         aria-expanded={showJson}
         aria-controls="json-container"

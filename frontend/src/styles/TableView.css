@@ -31,79 +31,7 @@
   flex-wrap: wrap;
 }
 
-.table-toggle-btn {
-  padding: 14px 28px;
-  font-size: 16px;
-  font-weight: 600;
-  font-family: 'DM Sans', 'Segoe UI', sans-serif;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(42, 93, 60, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.save-image-btn {
-  background: linear-gradient(135deg, #6f42c1 0%, #8b5cf6 100%);
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: 'DM Sans', 'Segoe UI', sans-serif;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-}
-
-.save-image-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(111, 66, 193, 0.4);
-  background: linear-gradient(135deg, #5a37a8 0%, #7c3aed 100%);
-}
-
-.save-image-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.save-image-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.save-image-btn svg {
-  flex-shrink: 0;
-}
-
-.table-toggle-btn:hover:not(:disabled) {
-  background-color: var(--dark-color);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(42, 93, 60, 0.4);
-}
-
-.table-toggle-btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(42, 93, 60, 0.3);
-}
-
-.table-toggle-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-  background-color: #ccc;
-  box-shadow: none;
-  transform: none;
-}
+/* Button styles removed - now using global .button classes */
 
 .loading-spinner {
   width: 16px;
@@ -337,12 +265,7 @@
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-  .table-toggle-btn {
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
-    justify-content: center;
-  }
+  /* Button responsive styles now handled by global .button classes */
 
   .table-header {
     padding: 12px 15px;
@@ -359,11 +282,7 @@
     margin-right: 10px;
   }
 
-  .save-image-btn {
-    flex-shrink: 0;
-    padding: 8px 12px;
-    font-size: 12px;
-  }
+  /* Button responsive styles now handled by global .button classes */
 
   .table-content {
     max-height: 400px;
@@ -400,10 +319,7 @@
 }
 
 @media (max-width: 480px) {
-  .table-toggle-btn {
-    padding: 14px;
-    font-size: 16px;
-  }
+  /* Button responsive styles now handled by global .button classes */
 
   .table-header {
     padding: 10px 12px;
@@ -420,16 +336,7 @@
     margin-right: 8px;
   }
 
-  .save-image-btn {
-    flex-shrink: 0;
-    padding: 6px 10px;
-    font-size: 11px;
-  }
-
-  .save-image-btn svg {
-    width: 14px;
-    height: 14px;
-  }
+  /* Button responsive styles now handled by global .button classes */
 
   .table-content {
     max-height: 350px;
