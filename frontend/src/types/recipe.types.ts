@@ -3,6 +3,21 @@ export type IngredientGroup = {
   ingredients: string[];
 };
 
+export type TableRow = {
+  ingredient: string;
+  cells: string[];
+};
+
+export type WorkflowTable = {
+  headers: string[];
+  rows: TableRow[];
+};
+
+export type TableData = {
+  title: string;
+  table: WorkflowTable;
+};
+
 export type Recipe = {
   title: string;
   ingredients: string[];
@@ -16,4 +31,5 @@ export type Recipe = {
   image?: string;
   host?: string;
   raw_json?: any;
+  table_data?: TableData;
 };

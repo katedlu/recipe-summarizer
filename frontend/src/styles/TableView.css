@@ -1,0 +1,301 @@
+.table-view {
+  margin-top: 30px;
+  width: 100%;
+}
+
+.table-toggle-btn {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-toggle-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.table-toggle-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.table-toggle-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.table-error {
+  margin-top: 15px;
+  padding: 12px 16px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c33;
+  font-size: 14px;
+}
+
+.table-container {
+  margin-top: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.table-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.table-header h3 {
+  margin: 0;
+  color: #495057;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.table-content {
+  max-height: 600px;
+  overflow: auto;
+  padding: 0;
+}
+
+.table-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-content::-webkit-scrollbar-track {
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.table-content::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+  border-radius: 4px;
+}
+
+.table-content::-webkit-scrollbar-thumb:hover {
+  background: #6c757d;
+}
+
+.workflow-table {
+  width: 100%;
+  min-width: 600px;
+}
+
+.workflow-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.workflow-table thead th {
+  background: linear-gradient(135deg, #495057 0%, #6c757d 100%);
+  color: white;
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.workflow-table thead th:last-child {
+  border-right: none;
+}
+
+.ingredient-header {
+  min-width: 150px;
+  background: linear-gradient(135deg, #28a745 0%, #34ce57 100%) !important;
+}
+
+.step-header {
+  min-width: 120px;
+  text-align: center !important;
+}
+
+.prep-row {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  font-weight: 600;
+}
+
+.prep-row .ingredient-cell {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color: white;
+  font-weight: 700;
+}
+
+.ingredient-row:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.ingredient-row:hover {
+  background: #e3f2fd;
+}
+
+.ingredient-cell {
+  padding: 10px 12px;
+  font-weight: 600;
+  color: #495057;
+  background: #e8f5e8;
+  border-right: 2px solid #28a745;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: top;
+  min-width: 150px;
+}
+
+.step-cell {
+  padding: 10px 8px;
+  color: #6c757d;
+  border-right: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+  text-align: center;
+  vertical-align: middle;
+  min-width: 120px;
+  word-wrap: break-word;
+}
+
+.step-cell:last-child {
+  border-right: none;
+}
+
+.step-cell:empty {
+  background: #f8f9fa;
+  position: relative;
+}
+
+.step-cell:empty::after {
+  content: "—";
+  color: #dee2e6;
+  font-weight: bold;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .table-toggle-btn {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 16px;
+    justify-content: center;
+  }
+
+  .table-header {
+    padding: 15px;
+  }
+
+  .table-header h3 {
+    font-size: 18px;
+  }
+
+  .table-content {
+    max-height: 400px;
+  }
+
+  .workflow-table table {
+    font-size: 12px;
+  }
+
+  .workflow-table thead th {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+
+  .ingredient-cell {
+    padding: 8px 6px;
+    font-size: 12px;
+    min-width: 120px;
+  }
+
+  .step-cell {
+    padding: 8px 4px;
+    font-size: 11px;
+    min-width: 80px;
+  }
+
+  .ingredient-header {
+    min-width: 120px;
+  }
+
+  .step-header {
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-toggle-btn {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  .table-header {
+    padding: 12px;
+  }
+
+  .table-header h3 {
+    font-size: 16px;
+  }
+
+  .table-content {
+    max-height: 350px;
+  }
+
+  .workflow-table {
+    min-width: 400px;
+  }
+
+  .workflow-table table {
+    font-size: 11px;
+  }
+
+  .workflow-table thead th {
+    padding: 6px 3px;
+    font-size: 11px;
+  }
+
+  .ingredient-cell {
+    padding: 6px 4px;
+    font-size: 11px;
+    min-width: 100px;
+  }
+
+  .step-cell {
+    padding: 6px 3px;
+    font-size: 10px;
+    min-width: 60px;
+  }
+
+  .ingredient-header {
+    min-width: 100px;
+  }
+
+  .step-header {
+    min-width: 60px;
+  }
+}

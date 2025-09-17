@@ -1,10 +1,16 @@
 
 import datetime
+import uuid
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file FIRST
+load_dotenv()
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from recipe_scrapers import scrape_me
-import os
-import uuid
+from llm_service import llm_service
 
 # Create a deployment ID and timestamp when the app starts
 DEPLOYMENT_ID = str(uuid.uuid4())[:8]  # Short UUID for readability
@@ -72,9 +78,28 @@ def index():
         'environment': os.environ.get('FLASK_ENV', 'production')
     })
 
+@app.route('/health')
+def health():
+    return jsonify({'status': 'healthy', 'service': 'recipe-summarizer-backend'})
+
 @app.route('/api/hello')
 def hello():
     return jsonify({'message': 'Hello from Python backend!'})
+
+@app.route('/api/test-llm')
+def test_llm():
+    """Test Azure OpenAI connectivity"""
+    try:
+        # Simple test data
+        test_data = {"test": "data"}
+        result = llm_service.parse_recipe_to_table(test_data)
+        return jsonify({
+            'success': result['success'],
+            'error': result.get('error', None),
+            'message': 'LLM test completed'
+        })
+    except Exception as e:
+        return jsonify({'error': f'LLM test failed: {str(e)}'}), 500
 
 @app.route('/api/parse-recipe', methods=['POST'])
 def parse_recipe_endpoint():
@@ -91,5 +116,33 @@ def parse_recipe_endpoint():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/parse-to-table', methods=['POST'])
+def parse_to_table_endpoint():
+    """
+    Parse recipe JSON data into a structured table using LLM
+    """
+    data = request.get_json()
+    
+    if not data or 'raw_json' not in data:
+        return jsonify({'error': 'raw_json is required'}), 400
+    
+    raw_json = data['raw_json']
+    
+    try:
+        print(f"Attempting to parse recipe to table...")
+        result = llm_service.parse_recipe_to_table(raw_json)
+        print(f"LLM service result: {result}")
+        
+        if result['success']:
+            return jsonify(result['table_data'])
+        else:
+            print(f"LLM service failed with error: {result['error']}")
+            return jsonify({'error': result['error']}), 500
+            
+    except Exception as e:
+        print(f"Exception in parse_to_table_endpoint: {str(e)}")
+        return jsonify({'error': f'Failed to process request: {str(e)}'}), 500
+
 if __name__ == '__main__':
-    app.run(port=5001)
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='localhost', port=port, debug=True)
