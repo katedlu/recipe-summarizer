@@ -28,7 +28,7 @@ class LLMService:
             self.client = AzureOpenAI(
                 api_key=api_key,
                 azure_endpoint=endpoint,
-                api_version="2024-02-15-preview"
+                api_version="2024-06-01"
             )
             logging.info("Azure OpenAI client initialized successfully")
             
@@ -57,7 +57,8 @@ class LLMService:
                         "content": prompt
                     }
                 ],
-                max_completion_tokens=2000  # Updated parameter name for newer models
+                max_tokens=2000,
+                temperature=1.0,
             )
             
             # Parse the response
@@ -96,11 +97,23 @@ class LLMService:
                 'error': f"Failed to parse LLM response as JSON: {str(e)}. Response was: {content[:200]}..."
             }
         except Exception as e:
-            logging.error(f"LLM service error: {str(e)}")
+            error_message = str(e)
+            logging.error(f"LLM service error: {error_message}")
+            
+            # Provide more specific error information
+            if "Connection error" in error_message or "connection" in error_message.lower():
+                error_message = f"Connection error to Azure OpenAI. Check your endpoint URL and network connectivity. Original error: {error_message}"
+            elif "403" in error_message or "forbidden" in error_message.lower():
+                error_message = f"Access forbidden. Check your API key and endpoint permissions. Original error: {error_message}"
+            elif "401" in error_message or "unauthorized" in error_message.lower():
+                error_message = f"Unauthorized access. Check your API key. Original error: {error_message}"
+            elif "404" in error_message:
+                error_message = f"Resource not found. Check your endpoint URL and deployment name. Original error: {error_message}"
+            
             return {
                 'success': False,
                 'table_data': None,
-                'error': f"Failed to parse recipe with LLM: {str(e)}"
+                'error': f"Failed to parse recipe with LLM: {error_message}"
             }
     
     def _create_table_parsing_prompt(self, raw_json: Dict[str, Any]) -> str:
