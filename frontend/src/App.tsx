@@ -48,27 +48,37 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      
       <header className="app-header">
-        <img src={recipeasyLogo} alt="Recipeasy Logo" className="app-logo" />
+        <img src={recipeasyLogo} alt="Recipeasy application logo" className="app-logo" />
         <h1 className="app-title">Recipeasy</h1>
       </header>
 
-      <RecipeForm
-        url={url}
-        setUrl={setUrl}
-        onSubmit={handleSubmit}
-        loading={loading}
-      />
+      <main role="main" id="main-content">
+        <RecipeForm
+          url={url}
+          setUrl={setUrl}
+          onSubmit={handleSubmit}
+          loading={loading}
+        />
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="error-message" role="alert" aria-live="polite">
+            {error}
+          </div>
+        )}
 
-      {recipe && <RecipeCard recipe={recipe} />}
-      {recipe && recipe.raw_json && <JsonInfo jsonData={recipe.raw_json} />}
-      {recipe && recipe.raw_json && <TableView rawJson={recipe.raw_json} />}
+        {recipe && (
+          <section aria-label="Recipe Results">
+            <RecipeCard recipe={recipe} />
+            {recipe.raw_json && <JsonInfo jsonData={recipe.raw_json} />}
+            {recipe.raw_json && <TableView rawJson={recipe.raw_json} />}
+          </section>
+        )}
+      </main>
     </div>
   );
 };

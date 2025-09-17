@@ -12,16 +12,17 @@ type RecipeCardProps = {
 };
 
 const RecipeCard: React.FC<RecipeCardProps> = (props) => (
-  <div className="recipe-card">
+  <article className="recipe-card" aria-labelledby="recipe-title">
     {props.recipe.image && (
       <RecipeImage 
         imageSrc={props.recipe.image}
         title={props.recipe.title}
       />
     )}
-    <h2 className="recipe-card__title">{props.recipe.title}</h2>
+    <h2 id="recipe-title" className="recipe-card__title">{props.recipe.title}</h2>
     {props.recipe.host && (
       <p className="recipe-card__source">
+        <span className="sr-only">Recipe source: </span>
         Source: {props.recipe.host}
       </p>
     )}
@@ -37,7 +38,7 @@ const RecipeCard: React.FC<RecipeCardProps> = (props) => (
       
       <Instructions instructions={props.recipe.instructions} />
     </div>
-  </div>
+  </article>
 );
 
 export default RecipeCard;

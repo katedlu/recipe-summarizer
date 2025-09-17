@@ -17,23 +17,29 @@ const JsonInfo: React.FC<JsonInfoProps> = ({ jsonData }) => {
   };
 
   return (
-    <div className="json-info">
+    <section className="json-info" aria-label="Raw Recipe Data">
       <button 
         className="json-toggle-button" 
         onClick={toggleJson}
+        aria-expanded={showJson}
+        aria-controls="json-container"
+        aria-describedby="json-help"
       >
         {showJson ? 'Hide JSON' : 'Show JSON'}
       </button>
+      <div id="json-help" className="sr-only">
+        Toggle display of raw JSON data extracted from the recipe website
+      </div>
       
       {showJson && (
-        <div className="json-container">
+        <div id="json-container" className="json-container" role="region" aria-label="Raw JSON Data Display">
           <h3>Raw JSON Data</h3>
-          <pre className="json-display">
+          <pre className="json-display" aria-label="Recipe data in JSON format" tabIndex={0}>
             {JSON.stringify(jsonData, null, 2)}
           </pre>
         </div>
       )}
-    </div>
+    </section>
   );
 };
 

@@ -206,16 +206,19 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
   };
 
   return (
-    <div className="table-view">
+    <section className="table-view" aria-label="Recipe Workflow Table">
       <div className="table-controls">
         <button 
           className="table-toggle-btn" 
           onClick={toggleTable}
           disabled={loading}
+          aria-describedby={loading ? "table-loading-status" : undefined}
+          aria-expanded={showTable}
+          aria-controls="workflow-table-container"
         >
           {loading ? (
             <>
-              <span className="loading-spinner"></span>
+              <span className="loading-spinner" aria-hidden="true"></span>
               Generating Table...
             </>
           ) : showTable ? (
@@ -224,32 +227,38 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
             'Generate Cooking Workflow'
           )}
         </button>
+        {loading && (
+          <div id="table-loading-status" className="sr-only" aria-live="polite">
+            Generating cooking workflow table, please wait...
+          </div>
+        )}
       </div>
 
       {error && (
-        <div className="table-error">
+        <div className="table-error" role="alert" aria-live="polite">
           Error: {error}
         </div>
       )}
 
       {showTable && tableData && (
-        <div className="table-container" ref={tableRef}>
+        <div id="workflow-table-container" className="table-container" ref={tableRef} role="region" aria-label="Generated cooking workflow">
           <div className="table-header">
-            <h3>{tableData.title}</h3>
+            <h3 id="table-title">{tableData.title}</h3>
             <button 
               className="save-image-btn" 
               onClick={saveAsImage}
               disabled={savingImage}
-              title="Save table as image"
+              aria-label="Save table as PNG image"
+              aria-describedby={savingImage ? "save-loading-status" : "save-help"}
             >
               {savingImage ? (
                 <>
-                  <span className="loading-spinner"></span>
+                  <span className="loading-spinner" aria-hidden="true"></span>
                   Saving...
                 </>
               ) : (
                 <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -258,14 +267,31 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
                 </>
               )}
             </button>
+            {savingImage && (
+              <div id="save-loading-status" className="sr-only" aria-live="polite">
+                Saving table as image, please wait...
+              </div>
+            )}
+            {!savingImage && (
+              <div id="save-help" className="sr-only">
+                Downloads the cooking workflow table as a PNG image file
+              </div>
+            )}
           </div>
           <div className="table-content">
             <div className="workflow-table">
-              <table>
+              <table aria-labelledby="table-title" aria-describedby="table-description">
+                <caption id="table-description" className="sr-only">
+                  A cooking workflow table showing ingredients and their corresponding preparation steps organized chronologically
+                </caption>
                 <thead>
                   <tr>
                     {tableData.table.headers.map((header, index) => (
-                      <th key={index} className={index === 0 ? "ingredient-header" : "step-header"}>
+                      <th 
+                        key={index} 
+                        className={index === 0 ? "ingredient-header" : "step-header"}
+                        scope="col"
+                      >
                         {header}
                       </th>
                     ))}
@@ -274,7 +300,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
                 <tbody>
                   {tableData.table.rows.map((row, rowIndex) => (
                     <tr key={rowIndex} className={row.ingredient === "PREP TASKS" ? "prep-row" : "ingredient-row"}>
-                      <td className="ingredient-cell">{row.ingredient}</td>
+                      <th scope="row" className="ingredient-cell">{row.ingredient}</th>
                       {row.cells.map((cell: TableCell, cellIndex) => {
                         // Handle different cell formats
                         if (typeof cell === 'object' && cell !== null) {
@@ -316,7 +342,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 };
 
