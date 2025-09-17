@@ -2,12 +2,18 @@ $appServicePlanName = 'recipe-summarizer-app-service'
 $backendAppName = 'recipe-summarizer-backend'
 $resourceGroup = 'recipe-summarizer-rg'
 
-# Store the original location and set paths relative to script location
-$originalLocation = Get-Location
-# Get the script directory path
-$scriptPath = $PSScriptRoot
-# Set path for deployment zip
-$deployZipPath = "$scriptPath\backend_deploy.zip"
+# Create a directory for database backups if it doesn't exist
+if (-not (Test-Path -Path "$scriptPath\database_backups")) {
+    New-Item -Path "$scriptPath\database_backups" -ItemType Directory
+}
+
+# Backup the database before deployment if it exists
+if (Test-Path -Path "$scriptPath\backend\database\recipe_app.db") {
+    $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $backupPath = "$scriptPath\database_backups\recipe_app_$timestamp.db"
+    Copy-Item -Path "$scriptPath\backend\database\recipe_app.db" -Destination $backupPath
+    Write-Host "Database backed up to $backupPath"
+}
 
 # Compress the backend folder for deployment
 Write-Host "Compressing backend files for deployment..."

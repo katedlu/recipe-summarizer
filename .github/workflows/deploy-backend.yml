@@ -86,6 +86,21 @@ jobs:
               --name ${{ env.APP_SERVICE_NAME }} \
               --allowed-origins "$FRONTEND_URL"
 
+      - name: Configure database persistence
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            # Ensure the database directory exists and is configured for persistence
+            az webapp config storage-account add \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --name ${{ env.APP_SERVICE_NAME }} \
+              --custom-id database \
+              --storage-type AzureFiles \
+              --account-name recipesummarizer \
+              --share-name recipedb \
+              --mount-path /home/site/wwwroot/database \
+              --access-key ${{ secrets.STORAGE_ACCESS_KEY }}
+              
       - name: Configure logging
         uses: azure/CLI@v1
         with:

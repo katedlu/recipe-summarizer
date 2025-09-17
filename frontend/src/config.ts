@@ -6,7 +6,7 @@ interface Config {
 // Different environments
 const environments: Record<string, Config> = {
   development: {
-    apiUrl: 'http://localhost:5000',
+    apiUrl: 'http://localhost:5001',
   },
   production: {
     apiUrl: 'https://recipe-summarizer-backend.azurewebsites.net',
@@ -30,4 +30,5 @@ const getEnvironment = (): string => {
 const env = getEnvironment();
 const config = environments[env];
 
+export const API_URL = config.apiUrl;
 export default config;
