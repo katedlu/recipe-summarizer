@@ -3,9 +3,15 @@ export type IngredientGroup = {
   ingredients: string[];
 };
 
+export type TableCell = string | {
+  text: string;
+  rowspan?: number;
+  spanned?: boolean;
+};
+
 export type TableRow = {
   ingredient: string;
-  cells: string[];
+  cells: TableCell[];
 };
 
 export type WorkflowTable = {

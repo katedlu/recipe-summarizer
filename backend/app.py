@@ -144,5 +144,5 @@ def parse_to_table_endpoint():
         return jsonify({'error': f'Failed to process request: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
+    port = int(os.getenv('PORT', 5001))
     app.run(host='localhost', port=port, debug=True)
