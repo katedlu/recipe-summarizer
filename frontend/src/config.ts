@@ -6,7 +6,7 @@ interface Config {
 // Different environments
 const environments: Record<string, Config> = {
   development: {
-    apiUrl: 'http://localhost:5000',
+    apiUrl: 'http://localhost:5001',
   },
   production: {
     apiUrl: 'https://recipe-summarizer-backend.azurewebsites.net',
@@ -17,12 +17,12 @@ const environments: Record<string, Config> = {
 const getEnvironment = (): string => {
   // Check if we're in a production environment
   const host = window.location.hostname;
-  if (host.includes('azurewebsites.net') || 
-      host.includes('web.core.windows.net') || 
-      host === 'recipesummarizer.com') {
+  if (host.includes('azurewebsites.net') ||
+    host.includes('web.core.windows.net') ||
+    host === 'recipesummarizer.com') {
     return 'production';
   }
-  
+
   return 'development';
 };
 
