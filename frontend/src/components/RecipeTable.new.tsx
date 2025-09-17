@@ -13,11 +13,13 @@ const getBaseIngredient = (ingredient: string): string => {
 };
 
 const RecipeTable: React.FC<RecipeTableProps> = ({ recipe }) => {
+  // Check if we have meaningful ingredient groups
+  const hasGroups = recipe.ingredient_groups && recipe.ingredient_groups.length > 0;
+  
   // Ensure we always have a valid array of ingredient groups
-  const groupedIngredients: IngredientGroup[] = 
-    recipe.ingredient_groups && recipe.ingredient_groups.length > 0
-      ? recipe.ingredient_groups
-      : [{ purpose: 'Ingredients', ingredients: recipe.ingredients }];
+  const groupedIngredients: IngredientGroup[] = hasGroups
+    ? recipe.ingredient_groups!
+    : [{ purpose: 'Ingredients', ingredients: recipe.ingredients }];
 
   // Find which ingredients are used together in each instruction step
   const findStepGroups = () => {
@@ -57,8 +59,8 @@ const RecipeTable: React.FC<RecipeTableProps> = ({ recipe }) => {
       <table className="recipe-table">
         <thead>
           <tr>
-            <th className="group-column">Group</th>
-            <th className="ingredient-column">Ingredient</th>
+            {hasGroups && <th className="group-column">Group</th>}
+            <th className="ingredient-column">Ingredients</th>
             {recipe.instructions.map((_, index) => (
               <th key={index} className="step-column">
                 Step {index + 1}
@@ -70,8 +72,8 @@ const RecipeTable: React.FC<RecipeTableProps> = ({ recipe }) => {
           {groupedIngredients.map((group, groupIndex) => (
             group.ingredients.map((ingredient, ingredientIndex) => (
               <tr key={`${groupIndex}-${ingredientIndex}`}>
-                {/* Only show group name for first ingredient in group */}
-                {ingredientIndex === 0 && (
+                {/* Only show group name for first ingredient in group, and only if we have groups */}
+                {hasGroups && ingredientIndex === 0 && (
                   <td 
                     className="group-cell" 
                     rowSpan={group.ingredients.length}

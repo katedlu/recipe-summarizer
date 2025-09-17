@@ -57,6 +57,49 @@ def format_recipe_scraper_error(error_message: str, url: str) -> str:
         # For other errors, provide a generic but helpful message
         return f"Sorry, we encountered an issue while trying to scrape the recipe from {domain}. This website may not be supported or the page format may have changed."
 
+def has_meaningful_ingredient_groups(ingredient_groups):
+    """
+    Check if ingredient groups are meaningful enough to warrant a group column
+    """
+    # No groups at all
+    if not ingredient_groups:
+        return False
+        
+    # Less than 2 groups (single group not meaningful for column)
+    if len(ingredient_groups) < 2:
+        return False
+        
+    # Check if groups have meaningful purposes and ingredients
+    meaningful_groups = 0
+    for group in ingredient_groups:
+        # Get purpose - handle both dict and object attributes
+        purpose = ''
+        if hasattr(group, 'purpose'):
+            purpose = group.purpose or ''
+        elif isinstance(group, dict):
+            purpose = group.get('purpose', '') or ''
+        
+        # Get ingredients - handle both dict and object attributes
+        ingredients = []
+        if hasattr(group, 'ingredients'):
+            ingredients = group.ingredients or []
+        elif isinstance(group, dict):
+            ingredients = group.get('ingredients', []) or []
+        
+        # Skip groups without purpose or with empty/generic purposes
+        purpose = purpose.strip()
+        if not purpose or purpose.lower() in ['', 'ingredients', 'main', 'recipe']:
+            continue
+            
+        # Skip if no ingredients in the group
+        if not ingredients or len(ingredients) == 0:
+            continue
+            
+        meaningful_groups += 1
+    
+    # Need at least 2 meaningful groups to justify a group column
+    return meaningful_groups >= 2
+
 app = Flask(__name__)
 CORS(app)
 
@@ -89,10 +132,10 @@ def parse_recipe(url):
         except (AttributeError, NotImplementedError):
             raw_json = None
 
-        return {
+        # Build the response object
+        recipe_data = {
             'title': scraper.title() or 'Unknown Recipe',
             'ingredients': scraper.ingredients() or [],
-            'ingredient_groups': ingredient_groups,
             'instructions': scraper.instructions_list() or [],
             'equipment': equipment,
             'total_time': scraper.total_time() or None,
@@ -103,6 +146,12 @@ def parse_recipe(url):
             'host': scraper.host() or None,
             'raw_json': raw_json
         }
+        
+        # Only include ingredient_groups if they are meaningful
+        if has_meaningful_ingredient_groups(ingredient_groups):
+            recipe_data['ingredient_groups'] = ingredient_groups
+
+        return recipe_data
         
     except Exception as e:
         # Format the error message for better user experience

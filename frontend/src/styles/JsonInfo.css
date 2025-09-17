@@ -4,25 +4,28 @@
 }
 
 .json-toggle-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  background-color: var(--primary-color);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
   border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(42, 93, 60, 0.3);
 }
 
 .json-toggle-button:hover {
+  background-color: var(--dark-color);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 8px rgba(42, 93, 60, 0.4);
 }
 
 .json-toggle-button:active {
   transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(42, 93, 60, 0.3);
 }
 
 .json-container {
@@ -79,8 +82,8 @@
 @media (max-width: 768px) {
   .json-toggle-button {
     width: 100%;
-    padding: 1rem;
-    font-size: 1.1rem;
+    padding: 14px;
+    font-size: 16px;
   }
   
   .json-container {

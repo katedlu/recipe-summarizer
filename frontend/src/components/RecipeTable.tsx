@@ -7,19 +7,21 @@ type RecipeTableProps = {
 };
 
 const RecipeTable: React.FC<RecipeTableProps> = ({ recipe }) => {
+  // Check if we have meaningful ingredient groups
+  const hasGroups = recipe.ingredient_groups && recipe.ingredient_groups.length > 0;
+  
   // Ensure we always have a valid array of ingredient groups
-  const groups: IngredientGroup[] = 
-    recipe.ingredient_groups && recipe.ingredient_groups.length > 0
-      ? recipe.ingredient_groups
-      : [{ purpose: 'Ingredients', ingredients: recipe.ingredients }];
+  const groups: IngredientGroup[] = hasGroups
+    ? recipe.ingredient_groups!
+    : [{ purpose: 'Ingredients', ingredients: recipe.ingredients }];
 
   return (
     <div className="recipe-table-container">
       <table className="recipe-table">
         <thead>
           <tr>
-            <th className="group-column">Group</th>
-            <th className="ingredient-column">Ingredient</th>
+            {hasGroups && <th className="group-column">Group</th>}
+            <th className="ingredient-column">Ingredients</th>
           </tr>
         </thead>
         <tbody>
@@ -27,8 +29,8 @@ const RecipeTable: React.FC<RecipeTableProps> = ({ recipe }) => {
             // Map each ingredient in the group
             group.ingredients.map((ingredient, ingredientIndex) => (
               <tr key={`${groupIndex}-${ingredientIndex}`}>
-                {/* Show group name only for first ingredient in group */}
-                {ingredientIndex === 0 && (
+                {/* Show group name only for first ingredient in group, and only if we have groups */}
+                {hasGroups && ingredientIndex === 0 && (
                   <td 
                     className="group-cell" 
                     rowSpan={group.ingredients.length}
