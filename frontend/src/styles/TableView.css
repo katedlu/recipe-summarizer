@@ -65,7 +65,6 @@
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   background: white;
   position: relative;
 }
@@ -97,17 +96,17 @@
   color: #495057;
   font-size: 22px;
   font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   flex: 1;
 }
 
 .table-content {
-  max-height: 70vh;
-  overflow: auto;
+  overflow: visible;
   padding: 0;
   width: 100%;
 }
 
+/* Scrollbar styles removed since overflow is now visible */
+/*
 .table-content::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -126,6 +125,7 @@
 .table-content::-webkit-scrollbar-thumb:hover {
   background: #6c757d;
 }
+*/
 
 .workflow-table {
   width: 100%;
@@ -133,12 +133,20 @@
   max-width: 100vw;
 }
 
+/* Add spacing after table description caption */
+.workflow-table caption {
+  margin-bottom: 16px;
+}
+
 .workflow-table table {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
-  table-layout: fixed;
+  table-layout: auto; /* Changed from fixed to auto for better cell sizing */
+  background-color: white; /* Ensure white background */
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .workflow-table thead th {
@@ -156,11 +164,18 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .workflow-table thead th:last-child {
   border-right: none;
+}
+
+.workflow-table thead th:first-child {
+  border-top-left-radius: 8px;
+}
+
+.workflow-table thead th:last-child {
+  border-top-right-radius: 8px;
 }
 
 .ingredient-header {
@@ -228,8 +243,7 @@
   padding: 6px 4px;
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
   color: #6c757d;
-  border-right: 1px solid #dee2e6;
-  border-bottom: 1px solid #dee2e6;
+  border: 1px solid #dee2e6; /* Simplified border */
   text-align: center;
   vertical-align: middle;
   min-width: 60px;
@@ -238,7 +252,7 @@
   overflow-wrap: break-word;
   font-size: 10px;
   line-height: 1.3;
-  background: white;
+  background-color: white; /* Consistent white background */
   transition: background-color 0.2s ease;
 }
 
@@ -263,11 +277,11 @@
 
 .merged-cell {
   vertical-align: middle !important;
-  background: #f8f9fa !important;
-  font-weight: 600;
-  color: #495057;
-  /* border: 2px solid #28a745 !important; */
-  box-shadow: inset 0 0 5px rgba(40, 167, 69, 0.1);
+  background-color: white !important; /* Same white background as step-cell */
+  font-weight: normal; /* Same font weight as step-cell */
+  color: #6c757d; /* Same color as step-cell */
+  box-shadow: none;
+  border: 1px solid #dee2e6 !important;
 }
 
 /* Mobile responsiveness */
@@ -291,9 +305,7 @@
 
   /* Button responsive styles now handled by global .button classes */
 
-  .table-content {
-    max-height: 60vh;
-  }
+  /* .table-content max-height removed since overflow is now visible */
 
   .workflow-table table {
     font-size: 10px;
@@ -349,9 +361,7 @@
 
   /* Button responsive styles now handled by global .button classes */
 
-  .table-content {
-    max-height: 50vh;
-  }
+  /* .table-content max-height removed since overflow is now visible */
 
   .workflow-table {
     min-width: 100%;

@@ -21,36 +21,28 @@
 .button--primary {
   background-color: var(--primary-color);
   color: white;
-  box-shadow: 0 2px 4px rgba(42, 93, 60, 0.3);
 }
 
 .button--primary:hover:not(:disabled) {
   background-color: var(--dark-color);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(42, 93, 60, 0.4);
 }
 
 .button--primary:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(42, 93, 60, 0.3);
+  background-color: var(--dark-color);
 }
 
 /* Secondary button variant - purple theme */
 .button--secondary {
   background: linear-gradient(135deg, #6f42c1 0%, #8b5cf6 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
 }
 
 .button--secondary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(111, 66, 193, 0.4);
   background: linear-gradient(135deg, #5a37a8 0%, #7c3aed 100%);
 }
 
 .button--secondary:active:not(:disabled) {
-  transform: translateY(1px);
-  box-shadow: 0 2px 8px rgba(111, 66, 193, 0.3);
+  background: linear-gradient(135deg, #5a37a8 0%, #7c3aed 100%);
 }
 
 /* Button size variants */
