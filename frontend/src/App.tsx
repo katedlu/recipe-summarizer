@@ -2,7 +2,7 @@ import React from 'react';
 import './styles/App.css';
 import RecipeForm from './components/RecipeForm';
 import RecipeCard from './components/RecipeCard';
-import JsonInfo from './components/JsonInfo';
+import JsonButton from './components/JsonButton';
 import TableView from './components/TableView';
 import recipeasyLogo from './media/recipeasy.png';
 import config from './config';
@@ -73,8 +73,9 @@ const App: React.FC = () => {
 
         {recipe && (
           <section aria-label="Recipe Results">
-            <RecipeCard recipe={recipe} />
-            {recipe.raw_json && <JsonInfo jsonData={recipe.raw_json} />}
+            <RecipeCard recipe={recipe}>
+              {recipe.raw_json && <JsonButton jsonData={recipe.raw_json} />}
+            </RecipeCard>
             {recipe.raw_json && <TableView rawJson={recipe.raw_json} />}
           </section>
         )}

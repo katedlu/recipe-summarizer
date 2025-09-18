@@ -9,6 +9,7 @@ import '../styles/RecipeCard.css';
 
 type RecipeCardProps = {
   recipe: Recipe;
+  children?: React.ReactNode;
 };
 
 const RecipeCard: React.FC<RecipeCardProps> = (props) => (
@@ -19,7 +20,10 @@ const RecipeCard: React.FC<RecipeCardProps> = (props) => (
         title={props.recipe.title}
       />
     )}
-    <h2 id="recipe-title" className="recipe-card__title">{props.recipe.title}</h2>
+    <div className="recipe-card__header">
+      <h2 id="recipe-title" className="recipe-card__title">{props.recipe.title}</h2>
+      {props.children}
+    </div>
     {props.recipe.host && (
       <p className="recipe-card__source">
         <span className="sr-only">Recipe source: </span>

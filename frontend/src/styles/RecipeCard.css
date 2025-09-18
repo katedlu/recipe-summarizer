@@ -3,19 +3,25 @@
   margin-top: 30px;
   background-color: white;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  padding: 25px;
+  padding: 5px 25px 25px 25px;
   overflow: hidden;
-  border: 1px solid var(--secondary-color);
+}
+
+.recipe-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 12px;
 }
 
 .recipe-card__title {
   color: var(--primary-color);
-  margin-bottom: 12px;
+  margin: 0;
   font-size: 2em;
   font-weight: 700;
-  border-bottom: 2px solid var(--secondary-color);
-  padding-bottom: 12px;
+  flex: 1;
 }
 
 .recipe-card__source {

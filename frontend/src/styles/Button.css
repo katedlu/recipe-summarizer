@@ -45,6 +45,25 @@
   background: linear-gradient(135deg, #5a37a8 0%, #7c3aed 100%);
 }
 
+/* Discrete button variant - minimal, low-profile styling */
+.button--discrete {
+  background: transparent;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+  font-size: 12px;
+  padding: 8px 16px;
+}
+
+.button--discrete:hover:not(:disabled) {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.button--discrete:active:not(:disabled) {
+  background: #e9ecef;
+  color: #495057;
+}
+
 /* Button size variants */
 .button--small {
   padding: 12px 20px;
@@ -66,7 +85,7 @@
 }
 
 .button:focus {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--focus-color);
   outline-offset: 2px;
 }
 

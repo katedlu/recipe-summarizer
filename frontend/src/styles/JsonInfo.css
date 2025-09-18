@@ -1,17 +1,25 @@
 .json-info {
-  margin-top: 2rem;
+  margin-top: 30px;
   width: 100%;
+  padding: 6px;
+}
+
+.json-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  padding: 6px;
 }
 
 /* Button styles removed - now using global .button classes */
 
 .json-container {
   margin-top: 1rem;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: transparent;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .json-container h3 {

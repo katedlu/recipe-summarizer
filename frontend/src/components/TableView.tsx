@@ -266,7 +266,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
             
             .recipe-title {
               text-align: center;
-              font-size: 16px;
+              font-size: 20px;
               font-weight: bold;
               margin-bottom: 15px;
               color: #333;
@@ -377,7 +377,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
           ) : showTable ? (
             'Hide Table'
           ) : (
-            'Generate Cooking Workflow'
+            'Generate Recipe Diagram'
           )}
         </button>
         <LoadingMessage isLoading={loading} />
