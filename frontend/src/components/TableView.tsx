@@ -5,6 +5,140 @@ import '../styles/TableView.css';
 import config from '../config';
 import type { TableData, TableCell } from '../types/recipe.types';
 
+// Component to render markdown table as HTML table
+const MarkdownTableRenderer: React.FC<{ markdownTable: string }> = ({ markdownTable }) => {
+  // Parse markdown table into rows
+  const lines = markdownTable.split('\n').filter(line => line.trim());
+  const parsedRows = lines.map(line => line.split('|').slice(1, -1).map(cell => cell.trim()));
+  
+  // Calculate vertical merges for each column
+  const calculateMerges = () => {
+    const merges: { [key: string]: { rowSpan: number; isSpanned: boolean } } = {};
+    
+    // Skip prep rows (first 2), only process ingredient rows
+    const ingredientRows = parsedRows.slice(2);
+    
+    // For each column (skip first column which is ingredients)
+    for (let colIndex = 1; colIndex < parsedRows[0].length; colIndex++) {
+      let currentGroup: number[] = [];
+      let currentValue = '';
+      
+      for (let rowIndex = 0; rowIndex < ingredientRows.length; rowIndex++) {
+        const actualRowIndex = rowIndex + 2; // Account for prep rows
+        const cellValue = ingredientRows[rowIndex][colIndex];
+        
+        if (cellValue === currentValue && cellValue !== '') {
+          // Continue the group
+          currentGroup.push(actualRowIndex);
+        } else {
+          // Process the previous group if it has multiple rows
+          if (currentGroup.length > 1) {
+            // First row gets rowSpan
+            merges[`${currentGroup[0]}-${colIndex}`] = { rowSpan: currentGroup.length, isSpanned: false };
+            // Other rows are marked as spanned
+            for (let i = 1; i < currentGroup.length; i++) {
+              merges[`${currentGroup[i]}-${colIndex}`] = { rowSpan: 1, isSpanned: true };
+            }
+          }
+          
+          // Start new group
+          currentGroup = cellValue !== '' ? [actualRowIndex] : [];
+          currentValue = cellValue;
+        }
+      }
+      
+      // Process the final group
+      if (currentGroup.length > 1) {
+        merges[`${currentGroup[0]}-${colIndex}`] = { rowSpan: currentGroup.length, isSpanned: false };
+        for (let i = 1; i < currentGroup.length; i++) {
+          merges[`${currentGroup[i]}-${colIndex}`] = { rowSpan: 1, isSpanned: true };
+        }
+      }
+    }
+    
+    return merges;
+  };
+  
+  const merges = calculateMerges();
+  
+  return (
+    <div className="workflow-table">
+      <table aria-labelledby="table-title" aria-describedby="table-description">
+        <caption id="table-description" className="sr-only">
+          A cooking workflow table showing ingredients and their corresponding preparation steps organized chronologically
+        </caption>
+        <tbody>
+          {parsedRows.map((cells, rowIndex) => {
+            const isPrep = rowIndex < 2; // First two rows are prep
+            
+            return (
+              <tr key={rowIndex} className={isPrep ? "prep-row" : "ingredient-row"}>
+                {cells.map((cell, cellIndex) => {
+                  if (cellIndex === 0) {
+                    // First column - ingredient or prep task
+                    if (isPrep && cell) {
+                      // For prep rows, span the text across all columns
+                      return (
+                        <th key={cellIndex} scope="row" className="ingredient-cell prep-cell" colSpan={cells.length}>
+                          {cell}
+                        </th>
+                      );
+                    } else {
+                      // Regular ingredient row
+                      return (
+                        <th key={cellIndex} scope="row" className="ingredient-cell">
+                          {cell}
+                        </th>
+                      );
+                    }
+                  } else if (isPrep) {
+                    // For prep rows, we've already spanned the first cell, so skip the rest
+                    return null;
+                  } else {
+                    // Other columns - steps (only for ingredient rows)
+                    const mergeKey = `${rowIndex}-${cellIndex}`;
+                    const mergeInfo = merges[mergeKey];
+                    
+                    if (mergeInfo && mergeInfo.isSpanned) {
+                      // This cell is part of a vertical merge and should not render
+                      return null;
+                    } else if (mergeInfo && mergeInfo.rowSpan > 1) {
+                      // This is the first cell of a vertical merge
+                      return (
+                        <td key={cellIndex} className="step-cell merged-cell" rowSpan={mergeInfo.rowSpan}>
+                          {cell}
+                        </td>
+                      );
+                    } else {
+                      // Regular cell
+                      return (
+                        <td key={cellIndex} className="step-cell">
+                          {cell}
+                        </td>
+                      );
+                    }
+                  }
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      
+      {/* Add copy instructions */}
+      <div className="copy-instructions">
+        <p><strong>To copy to Excel:</strong></p>
+        <ol>
+          <li>Select all table content above (Ctrl/Cmd+A)</li>
+          <li>Copy (Ctrl/Cmd+C)</li>
+          <li>Paste into Excel (Ctrl/Cmd+V)</li>
+          <li>Use Excel's "Merge Cells" feature to merge cells with identical text vertically</li>
+        </ol>
+      </div>
+    </div>
+  );
+};
+
 interface TableViewProps {
   rawJson: any;
 }
@@ -42,7 +176,19 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
       }
 
       const data = await response.json();
-      setTableData(data);
+      
+      // Check if we got the new markdown format
+      if (data.format === 'markdown' && data.markdown_table) {
+        // Convert markdown table to display format
+        setTableData({
+          title: "Recipe Cooking Workflow",
+          format: "markdown",
+          markdown_table: data.markdown_table
+        });
+      } else {
+        // Handle old format if still present
+        setTableData(data);
+      }
       setShowTable(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate table');
@@ -279,66 +425,72 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
             )}
           </div>
           <div className="table-content">
-            <div className="workflow-table">
-              <table aria-labelledby="table-title" aria-describedby="table-description">
-                <caption id="table-description" className="sr-only">
-                  A cooking workflow table showing ingredients and their corresponding preparation steps organized chronologically
-                </caption>
-                <thead>
-                  <tr>
-                    {tableData.table.headers.map((header, index) => (
-                      <th 
-                        key={index} 
-                        className={index === 0 ? "ingredient-header" : "step-header"}
-                        scope="col"
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {tableData.table.rows.map((row, rowIndex) => (
-                    <tr key={rowIndex} className={row.ingredient === "PREP TASKS" ? "prep-row" : "ingredient-row"}>
-                      <th scope="row" className="ingredient-cell">{row.ingredient}</th>
-                      {row.cells.map((cell: TableCell, cellIndex) => {
-                        // Handle different cell formats
-                        if (typeof cell === 'object' && cell !== null) {
-                          // Skip spanned cells - they don't render
-                          if (cell.spanned) {
-                            return null;
-                          }
-                          // Render cells with rowspan
-                          if (cell.rowspan) {
+            {tableData.format === 'markdown' && tableData.markdown_table ? (
+              <MarkdownTableRenderer markdownTable={tableData.markdown_table} />
+            ) : tableData.table ? (
+              <div className="workflow-table">
+                <table aria-labelledby="table-title" aria-describedby="table-description">
+                  <caption id="table-description" className="sr-only">
+                    A cooking workflow table showing ingredients and their corresponding preparation steps organized chronologically
+                  </caption>
+                  <thead>
+                    <tr>
+                      {tableData.table.headers.map((header, index) => (
+                        <th 
+                          key={index} 
+                          className={index === 0 ? "ingredient-header" : "step-header"}
+                          scope="col"
+                        >
+                          {header}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tableData.table.rows.map((row, rowIndex) => (
+                      <tr key={rowIndex} className={row.ingredient === "PREP TASKS" ? "prep-row" : "ingredient-row"}>
+                        <th scope="row" className="ingredient-cell">{row.ingredient}</th>
+                        {row.cells.map((cell: TableCell, cellIndex) => {
+                          // Handle different cell formats
+                          if (typeof cell === 'object' && cell !== null) {
+                            // Skip spanned cells - they don't render
+                            if (cell.spanned) {
+                              return null;
+                            }
+                            // Render cells with rowspan
+                            if (cell.rowspan) {
+                              return (
+                                <td 
+                                  key={cellIndex} 
+                                  className="step-cell"
+                                  rowSpan={cell.rowspan}
+                                >
+                                  {cell.text}
+                                </td>
+                              );
+                            }
+                            // Regular object format
                             return (
-                              <td 
-                                key={cellIndex} 
-                                className="step-cell"
-                                rowSpan={cell.rowspan}
-                              >
+                              <td key={cellIndex} className="step-cell">
                                 {cell.text}
                               </td>
                             );
                           }
-                          // Regular object format
+                          // Handle string format (backwards compatibility)
                           return (
                             <td key={cellIndex} className="step-cell">
-                              {cell.text}
+                              {cell as string}
                             </td>
                           );
-                        }
-                        // Handle string format (backwards compatibility)
-                        return (
-                          <td key={cellIndex} className="step-cell">
-                            {cell as string}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="error">No table data available</div>
+            )}
           </div>
         </div>
       )}
