@@ -187,11 +187,17 @@ Rules:
 1. The first two rows are preparation steps (e.g., "Grease a loaf pan", "Preheat oven to 350°F"), merged horizontally across all columns.
 2. Column 1: List every ingredient individually.
 3. Columns 2+: Represent sequential cooking actions.
-4. Shared actions (like combining dry ingredients) should be merged vertically across all relevant ingredient rows, with the text centered vertically.
-5. Dependent steps (Fold → Bake → Cool → Serve) should be merged vertically across all ingredient rows, centered.
-6. Do not include header rows for ingredients or steps.
-7. Output format: Markdown table suitable for Excel.
-8. Ensure proper cooking order — e.g., baking happens only after all ingredients are combined.
+4. IMPORTANT: When multiple ingredients have the EXACT SAME action (e.g., "Add to sauce", "Combine", "Beat together"), merge these vertically by using identical text in the same column for all affected ingredients. This creates Excel-style vertical cell merging.
+5. Examples of actions that should merge vertically:
+   - Multiple ingredients "Add to sauce"
+   - Multiple dry ingredients "Combine"  
+   - Multiple wet ingredients "Beat together"
+   - All ingredients "Bake 350°F for 60 min"
+   - All ingredients "Cool 10 min in pan"
+6. Sequential dependent steps should also be merged vertically across all ingredients when they apply to the whole dish.
+7. Do not include header rows for ingredients or steps.
+8. Output format: Markdown table suitable for Excel.
+9. Ensure proper cooking order — e.g., baking happens only after all ingredients are combined.
 
 Sample Input:
 {{
@@ -217,16 +223,24 @@ Sample Input:
   ]
 }}
 
-Expected Output Example (conceptual, first two rows are prep):
+Expected Output Example (notice identical actions use EXACT SAME TEXT for vertical merging):
 | Grease a loaf pan | | | | | | |
 | Preheat oven to 350°F | | | | | | |
 | 2 cups all-purpose flour | | Combine | | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
 | 1 teaspoon baking soda | | Combine | | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
 | 0.25 teaspoon salt | | Combine | | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
-| 0.75 cup brown sugar | Beat | | Stir in | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
-| 0.5 cup butter | Beat | | Stir in | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
+| 0.75 cup brown sugar | Beat together | | Stir in | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
+| 0.5 cup butter | Beat together | | Stir in | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
 | 2 eggs | | | Stir in | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
 | 2.33 cups mashed overripe banana | | | Stir in | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
+
+Sauce Example (your case - notice identical "Add to sauce" text):
+| Heat olive oil | | | |
+| Sauté onions until soft | | | |
+| 1 cup tomato passata | | Add to sauce | Simmer 20 min |
+| 1 cup heavy cream | | Add to sauce | Simmer 20 min |
+| 1 tbsp sugar | | Add to sauce | Simmer 20 min |
+| 1 1/4 tsp salt | | Add to sauce | Simmer 20 min |
 
 Now parse this recipe JSON:
 {json_str}
