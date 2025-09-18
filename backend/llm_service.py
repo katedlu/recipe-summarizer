@@ -1,7 +1,7 @@
 import os
 import json
 from typing import Dict, Any, List
-from openai import AzureOpenAI
+from openai import OpenAI
 import logging
 import re
 
@@ -20,39 +20,23 @@ class LLMService:
         elif isinstance(data, list):
             return [self._sanitize_unicode_data(item) for item in data]
         elif isinstance(data, str):
-            # Replace common problematic Unicode characters with ASCII equivalents
-            replacements = {
-                '\u2153': '1/3',      # ⅓
-                '\u2154': '2/3',      # ⅔
-                '\u2155': '1/5',      # ⅕
-                '\u2156': '2/5',      # ⅖
-                '\u2157': '3/5',      # ⅗
-                '\u2158': '4/5',      # ⅘
-                '\u2159': '1/6',      # ⅙
-                '\u215a': '5/6',      # ⅚
-                '\u215b': '1/8',      # ⅛
-                '\u215c': '3/8',      # ⅜
-                '\u215d': '5/8',      # ⅝
-                '\u215e': '7/8',      # ⅞
-                '\u00bd': '1/2',      # ½
-                '\u00bc': '1/4',      # ¼
-                '\u00be': '3/4',      # ¾
-                '\u2013': '-',        # en dash
-                '\u2014': '-',        # em dash
-                '\u2018': "'",        # left single quotation mark
-                '\u2019': "'",        # right single quotation mark
-                '\u201c': '"',        # left double quotation mark
-                '\u201d': '"',        # right double quotation mark
-                '\u00b0': ' degrees', # degree symbol
-            }
+            # Fast Unicode replacement using str.translate() - much faster than multiple replace() calls
+            translation_table = str.maketrans({
+                '\u2153': '1/3', '\u2154': '2/3', '\u2155': '1/5', '\u2156': '2/5', '\u2157': '3/5',
+                '\u2158': '4/5', '\u2159': '1/6', '\u215a': '5/6', '\u215b': '1/8', '\u215c': '3/8',
+                '\u215d': '5/8', '\u215e': '7/8', '\u00bd': '1/2', '\u00bc': '1/4', '\u00be': '3/4',
+                '\u2013': '-', '\u2014': '-', '\u2018': "'", '\u2019': "'", '\u201c': '"', '\u201d': '"',
+                '\u00b0': ' degrees'
+            })
             
-            result = data
-            for unicode_char, replacement in replacements.items():
-                result = result.replace(unicode_char, replacement)
+            result = data.translate(translation_table)
             
-            # Remove any remaining non-ASCII characters that might cause issues
-            result = result.encode('ascii', 'ignore').decode('ascii')
-            return result
+            # Quick ASCII check - only encode/decode if needed
+            try:
+                result.encode('ascii')
+                return result
+            except UnicodeEncodeError:
+                return result.encode('ascii', 'ignore').decode('ascii')
         else:
             return data
     
@@ -71,10 +55,12 @@ class LLMService:
             if not endpoint:
                 raise Exception("AZURE_OPENAI_ENDPOINT environment variable is required")
             
-            self.client = AzureOpenAI(
+            # Convert Azure endpoint to OpenAI client format
+            base_url = f"{endpoint.rstrip('/')}/openai/v1/"
+            
+            self.client = OpenAI(
                 api_key=api_key,
-                azure_endpoint=endpoint,
-                api_version="2024-06-01"
+                base_url=base_url
             )
             logging.info("Azure OpenAI client initialized successfully")
             
@@ -87,6 +73,14 @@ class LLMService:
         Use LLM to parse recipe JSON into a structured table format
         """
         try:
+            # Quick validation
+            if not raw_json.get('ingredients') or not raw_json.get('instructions'):
+                return {
+                    'success': False,
+                    'table_data': None,
+                    'error': "Recipe missing ingredients or instructions"
+                }
+            
             # Sanitize Unicode characters first
             sanitized_json = self._sanitize_unicode_data(raw_json)
             
@@ -95,55 +89,63 @@ class LLMService:
             
             # Call Azure OpenAI API
             response = self.client.chat.completions.create(
-                model=os.getenv('AZURE_OPENAI_DEPLOYMENT'),  # Azure deployment name
+                model=os.getenv('AZURE_OPENAI_DEPLOYMENT'),  # Azure deployment name (gpt-5-mini)
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a helpful assistant that converts recipe data into structured table format. Always respond with valid JSON only."
+                        "content": "You are a helpful assistant that converts recipe data into Excel-ready cooking tables. Always respond with only a markdown table, no other text or explanations."
                     },
                     {
                         "role": "user",
                         "content": prompt
                     }
                 ],
-                max_tokens=2000,
-                temperature=1.0,
+               
             )
-            
+
             # Parse the response
             content = response.choices[0].message.content
-            logging.info(f"Raw LLM response: {response}")
-            logging.info(f"LLM response content: '{content}'")
             
             if not content:
+                # Check if there was a finish reason that explains the empty response
+                finish_reason = response.choices[0].finish_reason
+                error_msg = f"LLM returned empty response. Finish reason: {finish_reason}"
+                
+                if finish_reason == 'length':
+                    error_msg += ". The response may have been cut off due to token limits."
+                elif finish_reason == 'content_filter':
+                    error_msg += ". The response was filtered due to content policy."
+                elif finish_reason == 'stop':
+                    error_msg += ". The model stopped generating but returned no content."
+                
                 return {
                     'success': False,
                     'table_data': None,
-                    'error': "LLM returned empty response"
+                    'error': error_msg
                 }
             
             content = content.strip()
             
             # Remove any markdown code blocks if present
-            if content.startswith('```json'):
-                content = content[7:-3]
-            elif content.startswith('```'):
-                content = content[3:-3]
+            if content.startswith('```'):
+                # Find the end of the code block
+                end_marker = content.rfind('```')
+                if end_marker > 3:
+                    content = content[3:end_marker].strip()
+                else:
+                    content = content[3:].strip()
             
-            # Parse JSON response
-            table_data = json.loads(content)
+            # The response is now a markdown table, not JSON
+            # Return it as-is for the frontend to display
+            table_data = {
+                'markdown_table': content,
+                'format': 'markdown'
+            }
             
             return {
                 'success': True,
                 'table_data': table_data,
                 'error': None
-            }
-            
-        except json.JSONDecodeError as e:
-            return {
-                'success': False,
-                'table_data': None,
-                'error': f"Failed to parse LLM response as JSON: {str(e)}. Response was: {content[:200]}..."
             }
         except Exception as e:
             error_message = str(e)
@@ -189,12 +191,25 @@ class LLMService:
             table_title = recipe_title
         
         prompt = f"""
-Please analyze the following recipe JSON data and convert it into a cooking workflow table format.
+Create Excel cooking workflow table from recipe JSON.
 
-Recipe JSON:
-{json_str}
+Rules:
+1. The first two rows are preparation steps (e.g., "Grease a loaf pan", "Preheat oven to 350°F"), merged horizontally across all columns.
+2. Column 1: List every ingredient individually.
+3. Columns 2+: Represent sequential cooking actions.
+4. IMPORTANT: When multiple ingredients have the EXACT SAME action (e.g., "Add to sauce", "Combine", "Beat together"), merge these vertically by using identical text in the same column for all affected ingredients. This creates Excel-style vertical cell merging.
+5. Examples of actions that should merge vertically:
+   - Multiple ingredients "Add to sauce"
+   - Multiple dry ingredients "Combine"  
+   - Multiple wet ingredients "Beat together"
+   - All ingredients "Bake 350°F for 60 min"
+   - All ingredients "Cool 10 min in pan"
+6. Sequential dependent steps should also be merged vertically across all ingredients when they apply to the whole dish.
+7. Do not include header rows for ingredients or steps.
+8. Output format: Markdown table suitable for Excel.
+9. Ensure proper cooking order — e.g., baking happens only after all ingredients are combined.
 
-Create a JSON response with this structure:
+Sample Input:
 {{
   "title": "{table_title}",
   "table": {{
@@ -316,21 +331,30 @@ Instructions for creating this table:
     }}
   ]
 }}
-```
-Note: Dry and wet ingredients are in SAME column since they can be mixed simultaneously.
 
-9. **Quality Checks**:
-   - Ensure the workflow is logical and follows the recipe sequence
-   - Verify that ALL preparation work is moved to PREP TASKS row
-   - Check that parallel actions are optimized (dry + wet ingredients in same column when possible)
-   - **Eliminate white space**: Remove ingredient rows that have no actions in any column
-   - Confirm that the table shows efficient multi-person cooking workflow 
-   - Make sure ingredients that can be processed simultaneously are grouped in same columns
-   - Verify that single-ingredient actions use simple string format
-   - Ensure the table minimizes columns while maximizing parallel efficiency
-   - Confirm the table would be practical for multiple people cooking together
+Expected Output Example (notice identical actions use EXACT SAME TEXT for vertical merging):
+| Grease a loaf pan | | | | | | |
+| Preheat oven to 350°F | | | | | | |
+| 2 cups all-purpose flour | | Combine | | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
+| 1 teaspoon baking soda | | Combine | | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
+| 0.25 teaspoon salt | | Combine | | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
+| 0.75 cup brown sugar | Beat together | | Stir in | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
+| 0.5 cup butter | Beat together | | Stir in | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
+| 2 eggs | | | Stir in | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
+| 2.33 cups mashed overripe banana | | | Stir in | Stir in | Bake 350°F for 60 min | Cool 10 min in pan |
 
-Return only valid JSON, no other text.
+Sauce Example (your case - notice identical "Add to sauce" text):
+| Heat olive oil | | | |
+| Sauté onions until soft | | | |
+| 1 cup tomato passata | | Add to sauce | Simmer 20 min |
+| 1 cup heavy cream | | Add to sauce | Simmer 20 min |
+| 1 tbsp sugar | | Add to sauce | Simmer 20 min |
+| 1 1/4 tsp salt | | Add to sauce | Simmer 20 min |
+
+Now parse this recipe JSON:
+{json_str}
+
+Return ONLY the markdown table, no other text or explanation.
 """
         return prompt
 

@@ -21,7 +21,9 @@ export type WorkflowTable = {
 
 export type TableData = {
   title: string;
-  table: WorkflowTable;
+  table?: WorkflowTable;
+  format?: string;
+  markdown_table?: string;
 };
 
 export type Recipe = {
