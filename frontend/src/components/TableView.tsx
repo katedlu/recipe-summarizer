@@ -4,6 +4,7 @@ import { saveAs } from 'file-saver';
 import '../styles/TableView.css';
 import config from '../config';
 import type { TableData, TableCell } from '../types/recipe.types';
+import LoadingMessage from './LoadingMessage';
 
 // Component to render markdown table as HTML table
 const MarkdownTableRenderer: React.FC<{ markdownTable: string }> = ({ markdownTable }) => {
@@ -364,14 +365,14 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
           className="button button--primary"
           onClick={toggleTable}
           disabled={loading}
-          aria-describedby={loading ? "table-loading-status" : undefined}
+          aria-describedby={loading ? "loading-status" : undefined}
           aria-expanded={showTable}
           aria-controls="workflow-table-container"
         >
           {loading ? (
             <>
               <span className="loading-spinner" aria-hidden="true"></span>
-              Generating Table...
+              Generating...
             </>
           ) : showTable ? (
             'Hide Table'
@@ -379,11 +380,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
             'Generate Cooking Workflow'
           )}
         </button>
-        {loading && (
-          <div id="table-loading-status" className="sr-only" aria-live="polite">
-            Generating cooking workflow table, please wait...
-          </div>
-        )}
+        <LoadingMessage isLoading={loading} />
       </div>
 
       {error && (
