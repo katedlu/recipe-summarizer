@@ -21,6 +21,8 @@
 .table-view {
   margin-top: 30px;
   width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 .table-controls {
@@ -70,6 +72,8 @@
   /* Ensure minimum dimensions for canvas capture */
   min-width: 300px;
   min-height: 200px;
+  max-width: 100vw;
+  width: 100%;
 }
 
 /* For image capture, ensure all content is visible */
@@ -101,7 +105,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #28a745, #20c997, #6f42c1, #8b5cf6);
+  /* background: linear-gradient(90deg, #28a745, #20c997, #6f42c1, #8b5cf6); */
   z-index: 1;
 }
 
@@ -126,9 +130,10 @@
 }
 
 .table-content {
-  max-height: 600px;
+  max-height: 70vh;
   overflow: auto;
   padding: 0;
+  width: 100%;
 }
 
 .table-content::-webkit-scrollbar {
@@ -152,27 +157,29 @@
 
 .workflow-table {
   width: 100%;
-  min-width: 600px;
+  min-width: 300px;
+  max-width: 100vw;
 }
 
 .workflow-table table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 12px;
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  table-layout: fixed;
 }
 
 .workflow-table thead th {
   background: linear-gradient(135deg, #495057 0%, #343a40 100%);
   color: white;
-  padding: 16px 12px;
+  padding: 8px 6px;
   text-align: left;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 11px;
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
-  border-bottom: 3px solid #28a745;
+  /* border-bottom: 2px solid #28a745; */
   border-right: 1px solid rgba(255, 255, 255, 0.2);
   position: sticky;
   top: 0;
@@ -185,14 +192,18 @@
 }
 
 .ingredient-header {
-  min-width: 180px;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  width: 25%;
+  min-width: 100px;
+  max-width: 150px;
+  /* background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important; */
   text-align: center !important;
   border-right: 2px solid rgba(255, 255, 255, 0.3) !important;
 }
 
 .step-header {
-  min-width: 120px;
+  width: auto;
+  min-width: 60px;
+  max-width: 80px;
   text-align: center !important;
 }
 
@@ -202,17 +213,17 @@
 }
 
 .prep-row .ingredient-cell {
-  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-  color: white;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f8f9fa 100%);
+  color: 495057;
   font-weight: 700;
 }
 
 .prep-cell {
   text-align: center !important;
   border-right: none !important;
-  font-size: 15px;
-  padding: 16px 20px;
-  letter-spacing: 0.5px;
+  font-size: 11px;
+  padding: 8px 10px;
+  letter-spacing: 0.3px;
 }
 
 .ingredient-row:nth-child(even) {
@@ -224,32 +235,37 @@
 }
 
 .ingredient-cell {
-  padding: 14px 16px;
+  padding: 8px 6px;
   font-weight: 600;
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
   color: #495057;
   background: #ffffff;
-  border-right: 3px solid #28a745;
+  /* border-right: 2px solid #28a745; */
   border-bottom: 1px solid #dee2e6;
   vertical-align: top;
-  min-width: 180px;
+  min-width: 100px;
+  max-width: 150px;
   text-align: center;
-  font-size: 14px;
-  letter-spacing: 0.3px;
+  font-size: 11px;
+  letter-spacing: 0.2px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .step-cell {
-  padding: 14px 12px;
+  padding: 6px 4px;
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
   color: #6c757d;
   border-right: 1px solid #dee2e6;
   border-bottom: 1px solid #dee2e6;
   text-align: center;
   vertical-align: middle;
-  min-width: 120px;
+  min-width: 60px;
+  max-width: 80px;
   word-wrap: break-word;
-  font-size: 13px;
-  line-height: 1.4;
+  overflow-wrap: break-word;
+  font-size: 10px;
+  line-height: 1.3;
   background: white;
   transition: background-color 0.2s ease;
 }
@@ -278,7 +294,7 @@
   background: #f8f9fa !important;
   font-weight: 600;
   color: #495057;
-  border: 2px solid #28a745 !important;
+  /* border: 2px solid #28a745 !important; */
   box-shadow: inset 0 0 5px rgba(40, 167, 69, 0.1);
 }
 
@@ -304,36 +320,40 @@
   /* Button responsive styles now handled by global .button classes */
 
   .table-content {
-    max-height: 400px;
+    max-height: 60vh;
   }
 
   .workflow-table table {
-    font-size: 12px;
+    font-size: 10px;
   }
 
   .workflow-table thead th {
-    padding: 8px 4px;
-    font-size: 12px;
+    padding: 6px 3px;
+    font-size: 9px;
   }
 
   .ingredient-cell {
-    padding: 8px 6px;
-    font-size: 12px;
-    min-width: 120px;
+    padding: 6px 4px;
+    font-size: 9px;
+    min-width: 80px;
+    max-width: 100px;
   }
 
   .step-cell {
-    padding: 8px 4px;
-    font-size: 11px;
-    min-width: 80px;
+    padding: 6px 3px;
+    font-size: 8px;
+    min-width: 50px;
+    max-width: 60px;
   }
 
   .ingredient-header {
-    min-width: 120px;
+    min-width: 80px;
+    max-width: 100px;
   }
 
   .step-header {
-    min-width: 80px;
+    min-width: 50px;
+    max-width: 60px;
   }
 }
 
@@ -358,40 +378,45 @@
   /* Button responsive styles now handled by global .button classes */
 
   .table-content {
-    max-height: 350px;
+    max-height: 50vh;
   }
 
   .workflow-table {
-    min-width: 400px;
+    min-width: 100%;
+    max-width: 100vw;
   }
 
   .workflow-table table {
-    font-size: 11px;
+    font-size: 9px;
   }
 
   .workflow-table thead th {
-    padding: 6px 3px;
-    font-size: 11px;
+    padding: 4px 2px;
+    font-size: 8px;
   }
 
   .ingredient-cell {
-    padding: 6px 4px;
-    font-size: 11px;
-    min-width: 100px;
+    padding: 4px 3px;
+    font-size: 8px;
+    min-width: 70px;
+    max-width: 80px;
   }
 
   .step-cell {
-    padding: 6px 3px;
-    font-size: 10px;
-    min-width: 60px;
+    padding: 4px 2px;
+    font-size: 7px;
+    min-width: 40px;
+    max-width: 50px;
   }
 
   .ingredient-header {
-    min-width: 100px;
+    min-width: 70px;
+    max-width: 80px;
   }
 
   .step-header {
-    min-width: 60px;
+    min-width: 40px;
+    max-width: 50px;
   }
 }
 
