@@ -64,120 +64,304 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
     
     setSavingImage(true);
     try {
-      const tableContainer = tableRef.current;
+      console.log('Starting improved image capture...');
       
-      console.log('Starting image capture...');
+      // Create a temporary container for clean capture
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.top = '-9999px';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.width = 'auto';
+      tempContainer.style.height = 'auto';
+      tempContainer.style.backgroundColor = '#ffffff';
+      tempContainer.style.padding = '20px';
+      tempContainer.style.fontFamily = "'DM Sans', 'Segoe UI', sans-serif";
       
-      // Add capture mode class
-      tableContainer.classList.add('capture-mode');
+      // Clone the table container content
+      const originalContainer = tableRef.current;
+      const clonedContainer = originalContainer.cloneNode(true) as HTMLElement;
       
-      // Wait for layout to stabilize and allow table to expand to full width
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Style the cloned container for optimal capture
+      clonedContainer.style.width = 'auto';
+      clonedContainer.style.height = 'auto';
+      clonedContainer.style.maxHeight = 'none';
+      clonedContainer.style.overflow = 'visible';
+      clonedContainer.style.border = '1px solid #e0e0e0';
+      clonedContainer.style.borderRadius = '12px';
+      clonedContainer.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)';
       
-      // Get the workflow table element which contains the actual table
-      const workflowTable = tableContainer.querySelector('.workflow-table') as HTMLElement;
-      if (!workflowTable) {
-        throw new Error('Workflow table element not found');
+      // Find and style the table content
+      const clonedContent = clonedContainer.querySelector('.table-content') as HTMLElement;
+      if (clonedContent) {
+        clonedContent.style.maxHeight = 'none';
+        clonedContent.style.overflow = 'visible';
+        clonedContent.style.width = 'auto';
+        clonedContent.style.height = 'auto';
       }
       
-      console.log('Container dimensions:', {
-        containerWidth: tableContainer.offsetWidth,
-        containerHeight: tableContainer.offsetHeight,
-        containerScrollWidth: tableContainer.scrollWidth,
-        containerScrollHeight: tableContainer.scrollHeight,
-        workflowTableWidth: workflowTable.offsetWidth,
-        workflowTableHeight: workflowTable.offsetHeight,
-        workflowTableScrollWidth: workflowTable.scrollWidth,
-        workflowTableScrollHeight: workflowTable.scrollHeight
-      });
-      
-      // Capture the entire container but with expanded dimensions
-      const captureWidth = Math.max(
-        tableContainer.scrollWidth,
-        workflowTable.scrollWidth,
-        tableContainer.offsetWidth
-      );
-      const captureHeight = Math.max(
-        tableContainer.scrollHeight,
-        workflowTable.scrollHeight,
-        tableContainer.offsetHeight
-      );
-      
-      console.log('Capture dimensions:', { captureWidth, captureHeight });
-      
-      // Configure html2canvas with explicit dimensions to capture full width
-      const canvas = await html2canvas(tableContainer, {
-        backgroundColor: '#ffffff',
-        scale: 1,
-        useCORS: true,
-        allowTaint: true,
-        logging: true,
-        width: captureWidth,
-        height: captureHeight,
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: captureWidth,
-        windowHeight: captureHeight,
-        onclone: (clonedDoc) => {
-          console.log('Document cloned for capture');
-          // Ensure cloned elements have capture mode styles and expanded width
-          const clonedContainer = clonedDoc.querySelector('.table-container') as HTMLElement;
-          if (clonedContainer) {
-            clonedContainer.classList.add('capture-mode');
-            clonedContainer.style.width = `${captureWidth}px`;
-            clonedContainer.style.height = `${captureHeight}px`;
+      // Find and style the workflow table
+      const clonedTable = clonedContainer.querySelector('.workflow-table') as HTMLElement;
+      if (clonedTable) {
+        clonedTable.style.width = 'auto';
+        clonedTable.style.maxWidth = '1200px'; // Prevent excessive stretching
+        clonedTable.style.minWidth = '600px'; // Ensure minimum readability
+        
+        // Ensure the actual table element has proper styling
+        const tableElement = clonedTable.querySelector('table') as HTMLElement;
+        if (tableElement) {
+          tableElement.style.width = '100%';
+          tableElement.style.tableLayout = 'fixed'; // Use fixed layout for consistent column widths
+          tableElement.style.borderCollapse = 'collapse';
+          
+          // Calculate and set column widths based on content
+          const headers = tableElement.querySelectorAll('thead th');
+          const totalColumns = headers.length;
+          
+          if (totalColumns > 0) {
+            // Set intelligent column widths
+            const ingredientColumnWidth = '200px'; // Fixed width for ingredient column
+            const remainingWidth = `calc((100% - 200px) / ${totalColumns - 1})`;
             
-            const clonedContent = clonedContainer.querySelector('.table-content') as HTMLElement;
-            if (clonedContent) {
-              clonedContent.style.width = `${captureWidth}px`;
-              clonedContent.style.height = `${captureHeight}px`;
-            }
-            
-            const clonedWorkflowTable = clonedContainer.querySelector('.workflow-table') as HTMLElement;
-            if (clonedWorkflowTable) {
-              clonedWorkflowTable.style.width = `${captureWidth}px`;
-            }
+            headers.forEach((header, index) => {
+              const headerElement = header as HTMLElement;
+              if (index === 0) {
+                // Ingredient column - fixed width
+                headerElement.style.width = ingredientColumnWidth;
+                headerElement.style.minWidth = ingredientColumnWidth;
+                headerElement.style.maxWidth = ingredientColumnWidth;
+              } else {
+                // Step columns - equal width distribution
+                headerElement.style.width = remainingWidth;
+                headerElement.style.minWidth = '120px';
+                headerElement.style.maxWidth = '250px';
+              }
+            });
           }
+          
+          // Fix sticky header issue - remove sticky positioning for capture
+          const headerCells = tableElement.querySelectorAll('thead th');
+          headerCells.forEach(cell => {
+            const cellElement = cell as HTMLElement;
+            cellElement.style.position = 'static';
+            cellElement.style.top = 'auto';
+            cellElement.style.zIndex = 'auto';
+            // Ensure header styling is preserved
+            cellElement.style.backgroundColor = '#495057';
+            cellElement.style.color = 'white';
+            cellElement.style.fontWeight = '700';
+            cellElement.style.fontSize = '14px';
+            cellElement.style.textTransform = 'uppercase';
+            cellElement.style.letterSpacing = '0.5px';
+            cellElement.style.borderBottom = '3px solid #28a745';
+          });
+          
+          // Ensure ingredient headers have the correct green background
+          const ingredientHeaders = tableElement.querySelectorAll('thead th.ingredient-header');
+          ingredientHeaders.forEach(cell => {
+            const cellElement = cell as HTMLElement;
+            cellElement.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+          });
+          
+          // Ensure all cells have proper padding and borders with controlled text wrapping
+          const cells = tableElement.querySelectorAll('th, td');
+          cells.forEach((cell, index) => {
+            const cellElement = cell as HTMLElement;
+            cellElement.style.padding = '12px 10px';
+            cellElement.style.border = '1px solid #dee2e6';
+            cellElement.style.verticalAlign = 'top';
+            cellElement.style.lineHeight = '1.4';
+            cellElement.style.fontSize = '13px';
+            
+            // Apply different text wrapping based on column type
+            const isIngredientColumn = cell.closest('tr')?.cells[0] === cell || 
+                                     cell.classList.contains('ingredient-cell') ||
+                                     cell.classList.contains('ingredient-header');
+            
+            if (isIngredientColumn) {
+              // Ingredient column - allow some wrapping but keep compact
+              cellElement.style.whiteSpace = 'normal';
+              cellElement.style.wordWrap = 'break-word';
+              cellElement.style.maxWidth = '200px';
+            } else {
+              // Step columns - allow wrapping for better readability
+              cellElement.style.whiteSpace = 'normal';
+              cellElement.style.wordWrap = 'break-word';
+              cellElement.style.maxWidth = '250px';
+              cellElement.style.hyphens = 'auto';
+            }
+          });
+        }
+      }
+      
+      // Remove any problematic elements (like save buttons)
+      const saveButtons = clonedContainer.querySelectorAll('button');
+      saveButtons.forEach(button => {
+        const buttonElement = button as HTMLElement;
+        if (buttonElement.textContent?.includes('Save') || buttonElement.getAttribute('aria-label')?.includes('Save')) {
+          buttonElement.remove();
         }
       });
       
+      tempContainer.appendChild(clonedContainer);
+      document.body.appendChild(tempContainer);
+      
+      // Wait for layout to stabilize
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Measure the actual content dimensions with improved calculation
+      const containerRect = clonedContainer.getBoundingClientRect();
+      const tableRect = clonedTable?.getBoundingClientRect();
+      
+      // Use controlled dimensions to prevent excessive stretching
+      const actualWidth = Math.min(
+        Math.max(
+          clonedContainer.scrollWidth, 
+          containerRect.width,
+          tableRect?.width || 0,
+          600 // minimum width
+        ),
+        1240 // maximum width (1200px table + 40px padding)
+      );
+      
+      const actualHeight = Math.max(
+        clonedContainer.scrollHeight, 
+        containerRect.height,
+        tableRect?.height || 0
+      );
+      
+      console.log('Capture dimensions:', { 
+        width: actualWidth, 
+        height: actualHeight,
+        containerScrollWidth: clonedContainer.scrollWidth,
+        containerRect: containerRect
+      });
+      
+      // Capture with clean settings
+      const canvas = await html2canvas(clonedContainer, {
+        backgroundColor: '#ffffff',
+        scale: 2, // Higher resolution for better quality
+        useCORS: true,
+        allowTaint: false,
+        logging: false,
+        width: actualWidth,
+        height: actualHeight,
+        scrollX: 0,
+        scrollY: 0,
+        // Ensure we capture from the very top
+        y: 0,
+        x: 0,
+        onclone: (clonedDoc) => {
+          // Ensure fonts are loaded in the cloned document
+          const style = clonedDoc.createElement('style');
+          style.textContent = `
+            @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+            * { font-family: 'DM Sans', 'Segoe UI', sans-serif !important; }
+            
+            /* Ensure header is visible and not sticky in the clone */
+            .workflow-table thead th {
+              position: static !important;
+              top: auto !important;
+              z-index: auto !important;
+              background: linear-gradient(135deg, #495057 0%, #343a40 100%) !important;
+              color: white !important;
+              font-weight: 700 !important;
+              font-size: 14px !important;
+              text-transform: uppercase !important;
+              letter-spacing: 0.5px !important;
+              border-bottom: 3px solid #28a745 !important;
+              padding: 12px 10px !important;
+            }
+            
+            .workflow-table thead th.ingredient-header {
+              background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+            }
+            
+            /* Controlled table layout and column widths */
+            .workflow-table table {
+              width: 100% !important;
+              table-layout: fixed !important;
+              border-collapse: collapse !important;
+              max-width: 1200px !important;
+            }
+            
+            .workflow-table {
+              max-width: 1200px !important;
+              min-width: 600px !important;
+            }
+            
+            /* Prevent column stretching */
+            .workflow-table th, .workflow-table td {
+              padding: 12px 10px !important;
+              border: 1px solid #dee2e6 !important;
+              vertical-align: top !important;
+              line-height: 1.4 !important;
+              font-size: 13px !important;
+              white-space: normal !important;
+              word-wrap: break-word !important;
+              hyphens: auto !important;
+            }
+            
+            /* Specific column width controls */
+            .workflow-table thead th:first-child,
+            .workflow-table .ingredient-cell {
+              width: 200px !important;
+              max-width: 200px !important;
+              min-width: 180px !important;
+            }
+            
+            .workflow-table thead th:not(:first-child),
+            .workflow-table .step-cell {
+              max-width: 250px !important;
+              min-width: 120px !important;
+            }
+            
+            /* Ensure all regular cells get proper backgrounds - default white */
+            .workflow-table td {
+              background: white !important;
+            }
+            
+            /* Empty cells should be neutral */
+            .workflow-table td:empty,
+            .workflow-table .step-cell:empty {
+              background: #f8f9fa !important;
+            }
+            
+            /* Specific styling for ingredient rows (override defaults) */
+            .workflow-table .ingredient-row:nth-child(even) td {
+              background: #f8f9fa !important;
+            }
+            
+            .workflow-table .ingredient-row:nth-child(odd) td {
+              background: white !important;
+            }
+            
+            /* PREP TASKS row styling - clean appearance for exports */
+            .workflow-table tr.prep-row td {
+              background: white !important;
+              font-weight: 600 !important;
+            }
+            
+            .workflow-table tr.prep-row td.ingredient-cell {
+              background: white !important;
+              color: #333 !important;
+              font-weight: 700 !important;
+            }
+          `;
+          clonedDoc.head.appendChild(style);
+        }
+      });
+      
+      // Clean up
+      document.body.removeChild(tempContainer);
+
       console.log('Canvas created:', {
         width: canvas.width,
         height: canvas.height
       });
-      
-      // Remove capture mode class
-      tableContainer.classList.remove('capture-mode');
 
       // Check if canvas has content
       if (canvas.width === 0 || canvas.height === 0) {
         throw new Error('Canvas has no dimensions');
-      }
-
-      // Check if canvas is actually empty (all white pixels)
-      const ctx = canvas.getContext('2d');
-      const imageData = ctx?.getImageData(0, 0, Math.min(canvas.width, 100), Math.min(canvas.height, 100));
-      const data = imageData?.data;
-      let hasContent = false;
-      
-      if (data) {
-        // Check if any pixel is not white (sample first 100x100 pixels for performance)
-        for (let i = 0; i < data.length; i += 4) {
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          const a = data[i + 3];
-          
-          // If we find a non-white pixel (considering alpha), we have content
-          if (a > 0 && (r < 255 || g < 255 || b < 255)) {
-            hasContent = true;
-            break;
-          }
-        }
-      }
-      
-      if (!hasContent) {
-        console.warn('Canvas appears to be mostly white, but proceeding with save');
       }
 
       // Convert canvas to blob and save
@@ -195,10 +379,6 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
       
     } catch (error) {
       console.error('Error saving image:', error);
-      // Remove capture mode class in case of error
-      if (tableRef.current) {
-        tableRef.current.classList.remove('capture-mode');
-      }
       setError(`Failed to save image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSavingImage(false);

@@ -178,6 +178,16 @@ class LLMService:
         # Ensure Unicode characters are properly handled - data should already be sanitized
         json_str = json.dumps(raw_json, indent=2, ensure_ascii=True)
         
+        # Extract recipe title and host for the table title
+        recipe_title = raw_json.get('title', 'Recipe')
+        recipe_host = raw_json.get('host', '')
+        
+        # Format the table title as "Recipe Title, Source"
+        if recipe_host:
+            table_title = f"{recipe_title}, {recipe_host}"
+        else:
+            table_title = recipe_title
+        
         prompt = f"""
 Please analyze the following recipe JSON data and convert it into a cooking workflow table format.
 
@@ -186,7 +196,7 @@ Recipe JSON:
 
 Create a JSON response with this structure:
 {{
-  "title": "Recipe Cooking Workflow",
+  "title": "{table_title}",
   "table": {{
     "headers": [array of column headers],
     "rows": [

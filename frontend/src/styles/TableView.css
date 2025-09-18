@@ -63,33 +63,7 @@
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   background: white;
-  /* Enhanced styles for image export */
   position: relative;
-  /* Ensure minimum dimensions for canvas capture */
-  min-width: 300px;
-  min-height: 200px;
-}
-
-/* For image capture, ensure all content is visible */
-.table-container.capture-mode {
-  overflow: visible !important;
-  max-height: none !important;
-  height: auto !important;
-  width: auto !important;
-  min-width: max-content !important;
-}
-
-.table-container.capture-mode .table-content {
-  overflow: visible !important;
-  max-height: none !important;
-  height: auto !important;
-  width: auto !important;
-  min-width: max-content !important;
-}
-
-.table-container.capture-mode .workflow-table {
-  width: auto !important;
-  min-width: max-content !important;
 }
 
 .table-container::before {
