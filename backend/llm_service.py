@@ -20,39 +20,23 @@ class LLMService:
         elif isinstance(data, list):
             return [self._sanitize_unicode_data(item) for item in data]
         elif isinstance(data, str):
-            # Replace common problematic Unicode characters with ASCII equivalents
-            replacements = {
-                '\u2153': '1/3',      # ⅓
-                '\u2154': '2/3',      # ⅔
-                '\u2155': '1/5',      # ⅕
-                '\u2156': '2/5',      # ⅖
-                '\u2157': '3/5',      # ⅗
-                '\u2158': '4/5',      # ⅘
-                '\u2159': '1/6',      # ⅙
-                '\u215a': '5/6',      # ⅚
-                '\u215b': '1/8',      # ⅛
-                '\u215c': '3/8',      # ⅜
-                '\u215d': '5/8',      # ⅝
-                '\u215e': '7/8',      # ⅞
-                '\u00bd': '1/2',      # ½
-                '\u00bc': '1/4',      # ¼
-                '\u00be': '3/4',      # ¾
-                '\u2013': '-',        # en dash
-                '\u2014': '-',        # em dash
-                '\u2018': "'",        # left single quotation mark
-                '\u2019': "'",        # right single quotation mark
-                '\u201c': '"',        # left double quotation mark
-                '\u201d': '"',        # right double quotation mark
-                '\u00b0': ' degrees', # degree symbol
-            }
+            # Fast Unicode replacement using str.translate() - much faster than multiple replace() calls
+            translation_table = str.maketrans({
+                '\u2153': '1/3', '\u2154': '2/3', '\u2155': '1/5', '\u2156': '2/5', '\u2157': '3/5',
+                '\u2158': '4/5', '\u2159': '1/6', '\u215a': '5/6', '\u215b': '1/8', '\u215c': '3/8',
+                '\u215d': '5/8', '\u215e': '7/8', '\u00bd': '1/2', '\u00bc': '1/4', '\u00be': '3/4',
+                '\u2013': '-', '\u2014': '-', '\u2018': "'", '\u2019': "'", '\u201c': '"', '\u201d': '"',
+                '\u00b0': ' degrees'
+            })
             
-            result = data
-            for unicode_char, replacement in replacements.items():
-                result = result.replace(unicode_char, replacement)
+            result = data.translate(translation_table)
             
-            # Remove any remaining non-ASCII characters that might cause issues
-            result = result.encode('ascii', 'ignore').decode('ascii')
-            return result
+            # Quick ASCII check - only encode/decode if needed
+            try:
+                result.encode('ascii')
+                return result
+            except UnicodeEncodeError:
+                return result.encode('ascii', 'ignore').decode('ascii')
         else:
             return data
     
@@ -89,25 +73,12 @@ class LLMService:
         Use LLM to parse recipe JSON into a structured table format
         """
         try:
-            # Log the input data for debugging
-            logging.info(f"Input recipe data keys: {list(raw_json.keys())}")
-            logging.info(f"Recipe title: {raw_json.get('title', 'No title')}")
-            logging.info(f"Number of ingredients: {len(raw_json.get('ingredients', []))}")
-            logging.info(f"Number of instructions: {len(raw_json.get('instructions', []))}")
-            
-            # Validate input data
-            if not raw_json.get('ingredients'):
+            # Quick validation
+            if not raw_json.get('ingredients') or not raw_json.get('instructions'):
                 return {
                     'success': False,
                     'table_data': None,
-                    'error': "Recipe has no ingredients"
-                }
-            
-            if not raw_json.get('instructions'):
-                return {
-                    'success': False,
-                    'table_data': None,
-                    'error': "Recipe has no instructions"
+                    'error': "Recipe missing ingredients or instructions"
                 }
             
             # Sanitize Unicode characters first
@@ -115,7 +86,6 @@ class LLMService:
             
             # Create a prompt for the LLM
             prompt = self._create_table_parsing_prompt(sanitized_json)
-            logging.info(f"Prompt length: {len(prompt)} characters")
             
             # Call Azure OpenAI API
             response = self.client.chat.completions.create(
@@ -130,15 +100,11 @@ class LLMService:
                         "content": prompt
                     }
                 ],
-                max_completion_tokens=8000,
-                temperature=1.0,  # Use default temperature (only supported value for this model)
+               
             )
 
             # Parse the response
             content = response.choices[0].message.content
-            logging.info(f"Raw LLM response: {response}")
-            logging.info(f"LLM response content: '{content}'")
-            logging.info(f"Response finish reason: {response.choices[0].finish_reason}")
             
             if not content:
                 # Check if there was a finish reason that explains the empty response

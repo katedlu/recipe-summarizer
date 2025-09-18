@@ -10,23 +10,23 @@ const MarkdownTableRenderer: React.FC<{ markdownTable: string }> = ({ markdownTa
   // Parse markdown table into rows
   const lines = markdownTable.split('\n').filter(line => line.trim());
   const parsedRows = lines.map(line => line.split('|').slice(1, -1).map(cell => cell.trim()));
-  
+
   // Calculate vertical merges for each column
   const calculateMerges = () => {
     const merges: { [key: string]: { rowSpan: number; isSpanned: boolean } } = {};
-    
+
     // Skip prep rows (first 2), only process ingredient rows
     const ingredientRows = parsedRows.slice(2);
-    
+
     // For each column (skip first column which is ingredients)
     for (let colIndex = 1; colIndex < parsedRows[0].length; colIndex++) {
       let currentGroup: number[] = [];
       let currentValue = '';
-      
+
       for (let rowIndex = 0; rowIndex < ingredientRows.length; rowIndex++) {
         const actualRowIndex = rowIndex + 2; // Account for prep rows
         const cellValue = ingredientRows[rowIndex][colIndex];
-        
+
         if (cellValue === currentValue && cellValue !== '') {
           // Continue the group
           currentGroup.push(actualRowIndex);
@@ -40,13 +40,13 @@ const MarkdownTableRenderer: React.FC<{ markdownTable: string }> = ({ markdownTa
               merges[`${currentGroup[i]}-${colIndex}`] = { rowSpan: 1, isSpanned: true };
             }
           }
-          
+
           // Start new group
           currentGroup = cellValue !== '' ? [actualRowIndex] : [];
           currentValue = cellValue;
         }
       }
-      
+
       // Process the final group
       if (currentGroup.length > 1) {
         merges[`${currentGroup[0]}-${colIndex}`] = { rowSpan: currentGroup.length, isSpanned: false };
@@ -55,12 +55,12 @@ const MarkdownTableRenderer: React.FC<{ markdownTable: string }> = ({ markdownTa
         }
       }
     }
-    
+
     return merges;
   };
-  
+
   const merges = calculateMerges();
-  
+
   return (
     <div className="workflow-table">
       <table aria-labelledby="table-title" aria-describedby="table-description">
@@ -70,7 +70,7 @@ const MarkdownTableRenderer: React.FC<{ markdownTable: string }> = ({ markdownTa
         <tbody>
           {parsedRows.map((cells, rowIndex) => {
             const isPrep = rowIndex < 2; // First two rows are prep
-            
+
             return (
               <tr key={rowIndex} className={isPrep ? "prep-row" : "ingredient-row"}>
                 {cells.map((cell, cellIndex) => {
@@ -98,7 +98,7 @@ const MarkdownTableRenderer: React.FC<{ markdownTable: string }> = ({ markdownTa
                     // Other columns - steps (only for ingredient rows)
                     const mergeKey = `${rowIndex}-${cellIndex}`;
                     const mergeInfo = merges[mergeKey];
-                    
+
                     if (mergeInfo && mergeInfo.isSpanned) {
                       // This cell is part of a vertical merge and should not render
                       return null;
@@ -124,17 +124,6 @@ const MarkdownTableRenderer: React.FC<{ markdownTable: string }> = ({ markdownTa
           })}
         </tbody>
       </table>
-      
-      {/* Add copy instructions */}
-      <div className="copy-instructions">
-        <p><strong>To copy to Excel:</strong></p>
-        <ol>
-          <li>Select all table content above (Ctrl/Cmd+A)</li>
-          <li>Copy (Ctrl/Cmd+C)</li>
-          <li>Paste into Excel (Ctrl/Cmd+V)</li>
-          <li>Use Excel's "Merge Cells" feature to merge cells with identical text vertically</li>
-        </ol>
-      </div>
     </div>
   );
 };
@@ -161,7 +150,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
     // Generate new table data
     setLoading(true);
     setError('');
-    
+
     try {
       const response = await fetch(`${config.apiUrl}/api/parse-to-table`, {
         method: 'POST',
@@ -176,7 +165,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
       }
 
       const data = await response.json();
-      
+
       // Check if we got the new markdown format
       if (data.format === 'markdown' && data.markdown_table) {
         // Convert markdown table to display format
@@ -207,25 +196,25 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
 
   const saveAsImage = async () => {
     if (!tableRef.current || !tableData) return;
-    
+
     setSavingImage(true);
     try {
       const tableContainer = tableRef.current;
-      
+
       console.log('Starting image capture...');
-      
+
       // Add capture mode class
       tableContainer.classList.add('capture-mode');
-      
+
       // Wait for layout to stabilize and allow table to expand to full width
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Get the workflow table element which contains the actual table
       const workflowTable = tableContainer.querySelector('.workflow-table') as HTMLElement;
       if (!workflowTable) {
         throw new Error('Workflow table element not found');
       }
-      
+
       console.log('Container dimensions:', {
         containerWidth: tableContainer.offsetWidth,
         containerHeight: tableContainer.offsetHeight,
@@ -236,7 +225,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
         workflowTableScrollWidth: workflowTable.scrollWidth,
         workflowTableScrollHeight: workflowTable.scrollHeight
       });
-      
+
       // Capture the entire container but with expanded dimensions
       const captureWidth = Math.max(
         tableContainer.scrollWidth,
@@ -248,9 +237,9 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
         workflowTable.scrollHeight,
         tableContainer.offsetHeight
       );
-      
+
       console.log('Capture dimensions:', { captureWidth, captureHeight });
-      
+
       // Configure html2canvas with explicit dimensions to capture full width
       const canvas = await html2canvas(tableContainer, {
         backgroundColor: '#ffffff',
@@ -272,13 +261,13 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
             clonedContainer.classList.add('capture-mode');
             clonedContainer.style.width = `${captureWidth}px`;
             clonedContainer.style.height = `${captureHeight}px`;
-            
+
             const clonedContent = clonedContainer.querySelector('.table-content') as HTMLElement;
             if (clonedContent) {
               clonedContent.style.width = `${captureWidth}px`;
               clonedContent.style.height = `${captureHeight}px`;
             }
-            
+
             const clonedWorkflowTable = clonedContainer.querySelector('.workflow-table') as HTMLElement;
             if (clonedWorkflowTable) {
               clonedWorkflowTable.style.width = `${captureWidth}px`;
@@ -286,12 +275,12 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
           }
         }
       });
-      
+
       console.log('Canvas created:', {
         width: canvas.width,
         height: canvas.height
       });
-      
+
       // Remove capture mode class
       tableContainer.classList.remove('capture-mode');
 
@@ -305,7 +294,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
       const imageData = ctx?.getImageData(0, 0, Math.min(canvas.width, 100), Math.min(canvas.height, 100));
       const data = imageData?.data;
       let hasContent = false;
-      
+
       if (data) {
         // Check if any pixel is not white (sample first 100x100 pixels for performance)
         for (let i = 0; i < data.length; i += 4) {
@@ -313,7 +302,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
           const g = data[i + 1];
           const b = data[i + 2];
           const a = data[i + 3];
-          
+
           // If we find a non-white pixel (considering alpha), we have content
           if (a > 0 && (r < 255 || g < 255 || b < 255)) {
             hasContent = true;
@@ -321,7 +310,7 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
           }
         }
       }
-      
+
       if (!hasContent) {
         console.warn('Canvas appears to be mostly white, but proceeding with save');
       }
@@ -332,13 +321,13 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
           console.log('Blob created successfully, size:', blob.size);
           const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
           const filename = `${tableData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_cooking_workflow_${timestamp}.png`;
-          
+
           saveAs(blob, filename);
         } else {
           throw new Error('Failed to create image blob');
         }
       }, 'image/png', 1.0);
-      
+
     } catch (error) {
       console.error('Error saving image:', error);
       // Remove capture mode class in case of error
@@ -354,8 +343,8 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
   return (
     <section className="table-view" aria-label="Recipe Workflow Table">
       <div className="table-controls">
-        <button 
-          className="button button--primary" 
+        <button
+          className="button button--primary"
           onClick={toggleTable}
           disabled={loading}
           aria-describedby={loading ? "table-loading-status" : undefined}
@@ -390,8 +379,8 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
         <div id="workflow-table-container" className="table-container" ref={tableRef} role="region" aria-label="Generated cooking workflow">
           <div className="table-header">
             <h3 id="table-title">{tableData.title}</h3>
-            <button 
-              className="button button--secondary button--small" 
+            <button
+              className="button button--secondary button--small"
               onClick={saveAsImage}
               disabled={savingImage}
               aria-label="Save table as PNG image"
@@ -405,9 +394,9 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
               ) : (
                 <>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   Save Image
                 </>
@@ -436,8 +425,8 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
                   <thead>
                     <tr>
                       {tableData.table.headers.map((header, index) => (
-                        <th 
-                          key={index} 
+                        <th
+                          key={index}
                           className={index === 0 ? "ingredient-header" : "step-header"}
                           scope="col"
                         >
@@ -460,8 +449,8 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
                             // Render cells with rowspan
                             if (cell.rowspan) {
                               return (
-                                <td 
-                                  key={cellIndex} 
+                                <td
+                                  key={cellIndex}
                                   className="step-cell"
                                   rowSpan={cell.rowspan}
                                 >
