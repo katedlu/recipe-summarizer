@@ -352,17 +352,16 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
         </html>
       `;
 
-      printWindow.document.write(printDocument);
-      printWindow.document.close();
-      
-      // Wait for content to load, then print
-      printWindow.onload = () => {
-        setTimeout(() => {
-          printWindow.print();
-          printWindow.close();
-        }, 500);
-      };
-    }
+    printWindow.document.write(printDocument);
+    printWindow.document.close();
+    
+    // Wait for content to load, then print
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    };
   };
 
   return (
