@@ -228,34 +228,129 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
   };
 
   const printToPDF = () => {
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      setError('Unable to open print window. Please check your browser settings.');
-      return;
-    }
-
+    // Detect if we're on mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
     // Get the table HTML
     const table = tableRef.current?.querySelector('table');
     if (!table) {
       setError('Table not found');
-      printWindow.close();
       return;
     }
 
-    // Create the print document
-    const printDocument = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${tableData?.title || 'Recipe Workflow'}</title>
+    if (isMobile) {
+      // For mobile: create a temporary div and print the current page
+      const originalContent = document.body.innerHTML;
+      const printContent = `
+        <div style="
+          font-family: 'DM Sans', Arial, sans-serif;
+          font-size: 12px;
+          line-height: 1.2;
+          margin: 10px;
+          padding: 0;
+        ">
+          <div style="
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+          ">${tableData?.title || 'Recipe Cooking Workflow'}</div>
+          <div style="
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+          ">
+            ${table.outerHTML}
+          </div>
+        </div>
         <style>
-          @page {
-            size: A4 landscape;
-            margin: 0.5in;
-          }
-          
           @media print {
+            * {
+              visibility: visible !important;
+              color: #000 !important;
+              background: white !important;
+            }
+            
+            table {
+              width: 100% !important;
+              border-collapse: separate !important;
+              border-spacing: 0 !important;
+              page-break-inside: avoid !important;
+              font-size: 10px !important;
+            }
+            
+            th, td {
+              border: 2px solid #000 !important;
+              padding: 6px 4px !important;
+              vertical-align: middle !important;
+              word-wrap: break-word !important;
+              font-size: 9px !important;
+              line-height: 1.2 !important;
+              text-align: center !important;
+              background: white !important;
+              color: #000 !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            
+            th {
+              background: #f0f0f0 !important;
+              font-weight: bold !important;
+              border: 2px solid #000 !important;
+              font-size: 10px !important;
+            }
+            
+            .ingredient-cell {
+              font-weight: 600 !important;
+              background: white !important;
+              border: 2px solid #000 !important;
+            }
+            
+            .step-cell {
+              background: white !important;
+              border: 2px solid #000 !important;
+            }
+            
+            .merged-cell {
+              background: #f8f8f8 !important;
+              font-weight: 600 !important;
+              border: 2px solid #000 !important;
+            }
+            
+            .prep-cell {
+              background: #e3f2fd !important;
+              font-weight: bold !important;
+              color: #1565c0 !important;
+              border: 2px solid #000 !important;
+            }
+          }
+        </style>
+      `;
+      
+      document.body.innerHTML = printContent;
+      window.print();
+      document.body.innerHTML = originalContent;
+      
+    } else {
+      // Desktop: use the existing popup window method
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        setError('Unable to open print window. Please check your browser settings.');
+        return;
+      }
+
+      const printDocument = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${tableData?.title || 'Recipe Workflow'}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            @page {
+              size: A4 landscape;
+              margin: 0.5in;
+            }
+            
             body {
               font-family: 'DM Sans', Arial, sans-serif;
               font-size: 10px;
@@ -275,15 +370,10 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
             
             table {
               width: 100%;
-              border-collapse: collapse;
+              border-collapse: separate;
+              border-spacing: 0;
               table-layout: fixed;
               page-break-inside: avoid;
-            }
-            
-            /* Add spacing after table caption/description */
-            caption {
-              margin-bottom: 20px;
-              padding-bottom: 10px;
             }
             
             th, td {
@@ -294,12 +384,12 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
               overflow-wrap: break-word;
               font-size: 9px;
               line-height: 1.3;
-              text-align: center; /* Center all text in cells */
+              text-align: center;
               font-family: 'DM Sans', Arial, sans-serif;
             }
             
             th {
-              background-color: #f0f0f0 !important;
+              background-color: #f0f0f0;
               font-weight: bold;
               text-align: center;
               font-size: 10px;
@@ -308,54 +398,68 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
             
             .ingredient-cell {
               font-weight: 600;
-              background-color: white !important;
-              text-align: center; /* Center ingredient text */
+              background-color: white;
+              text-align: center;
             }
             
             .step-cell {
-              background-color: white !important;
-              text-align: center; /* Center step text */
+              background-color: white;
+              text-align: center;
             }
             
             .merged-cell {
-              background-color: #f8f8f8 !important;
+              background-color: #f8f8f8;
               font-weight: 600;
-              text-align: center; /* Center merged cell text */
+              text-align: center;
             }
             
             .prep-cell {
-              background-color: #e3f2fd !important;
+              background-color: #e3f2fd;
               font-weight: bold;
               text-align: center;
               color: #1565c0;
             }
             
-            /* Ensure alternating rows are visible in print */
-            tr:nth-child(even) .ingredient-cell,
-            tr:nth-child(even) .step-cell {
-              background-color: #f9f9f9 !important;
+            @media print {
+              th, td {
+                border: 1px solid #000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              
+              th {
+                background-color: #f0f0f0 !important;
+              }
+              
+              .prep-cell {
+                background-color: #e3f2fd !important;
+                color: #1565c0 !important;
+              }
+              
+              .merged-cell {
+                background-color: #f8f8f8 !important;
+              }
             }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="recipe-title">${tableData?.title || 'Recipe Cooking Workflow'}</div>
-        ${table.outerHTML}
-      </body>
-      </html>
-    `;
+          </style>
+        </head>
+        <body>
+          <div class="recipe-title">${tableData?.title || 'Recipe Cooking Workflow'}</div>
+          ${table.outerHTML}
+        </body>
+        </html>
+      `;
 
-    // Write the document and print
-    printWindow.document.write(printDocument);
-    printWindow.document.close();
-    
-    // Wait for content to load, then print
-    printWindow.onload = () => {
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 500);
-    };
+      printWindow.document.write(printDocument);
+      printWindow.document.close();
+      
+      // Wait for content to load, then print
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      };
+    }
   };
 
   return (
@@ -380,8 +484,8 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
             'Generate Recipe Diagram'
           )}
         </button>
-        <LoadingMessage isLoading={loading} />
       </div>
+      <LoadingMessage isLoading={loading} />
 
       {error && (
         <div className="table-error" role="alert" aria-live="polite">
@@ -477,6 +581,9 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
             ) : (
               <div className="error">No table data available</div>
             )}
+          </div>
+          <div className="mobile-scroll-hint">
+            ← Scroll horizontally to see all columns →
           </div>
         </div>
       )}

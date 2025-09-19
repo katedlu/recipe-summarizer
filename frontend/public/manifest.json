@@ -1,25 +1,25 @@
 {
-  "short_name": "Recipe Summarizer",
-  "name": "Recipe Summarizer - AI-Powered Recipe Parser",
+  "short_name": "Recipeasy",
+  "name": "Recipeasy - Recipe Parser and Workflow Generator",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "recipeasy.png",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "type": "image/png"
     },
     {
-      "src": "logo192.png",
+      "src": "recipeasy.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "logo512.png",
+      "src": "recipeasy.png",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#28a745",
+  "theme_color": "#2A5D3C",
   "background_color": "#ffffff"
 }

@@ -29,7 +29,6 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-bottom: 20px;
   flex-wrap: wrap;
   padding: 6px;
 }
@@ -70,6 +69,32 @@
   position: relative;
 }
 
+/* Mobile scroll hint */
+.mobile-scroll-hint {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  margin: 10px auto 0;
+  width: fit-content;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .mobile-scroll-hint {
+    opacity: 1;
+  }
+  
+  /* Add margin to container to make room for hint */
+  .table-container {
+    margin-bottom: 20px;
+  }
+}
+
 .table-container::before {
   content: '';
   position: absolute;
@@ -101,13 +126,15 @@
 }
 
 .table-content {
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: visible;
   padding: 0;
   width: 100%;
+  /* Enable momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Scrollbar styles removed since overflow is now visible */
-/*
+/* Scrollbar styles for horizontal scrolling */
 .table-content::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -126,12 +153,11 @@
 .table-content::-webkit-scrollbar-thumb:hover {
   background: #6c757d;
 }
-*/
 
 .workflow-table {
   width: 100%;
-  min-width: 300px;
-  max-width: 100vw;
+  min-width: 600px; /* Ensure minimum width for table readability */
+  max-width: none;
 }
 
 /* Add spacing after table description caption */
@@ -304,41 +330,42 @@
     margin-right: 10px;
   }
 
-  /* Button responsive styles now handled by global .button classes */
-
-  /* .table-content max-height removed since overflow is now visible */
+  /* Ensure table maintains minimum width for horizontal scroll */
+  .workflow-table {
+    min-width: 600px; /* Keep minimum width for readability */
+  }
 
   .workflow-table table {
     font-size: 10px;
   }
 
   .workflow-table thead th {
-    padding: 6px 3px;
+    padding: 6px 4px;
     font-size: 9px;
   }
 
   .ingredient-cell {
     padding: 6px 4px;
     font-size: 9px;
-    min-width: 80px;
-    max-width: 100px;
+    min-width: 90px; /* Slightly larger for readability */
+    max-width: 120px;
   }
 
   .step-cell {
-    padding: 6px 3px;
+    padding: 6px 4px;
     font-size: 8px;
-    min-width: 50px;
-    max-width: 60px;
+    min-width: 55px; /* Slightly larger for readability */
+    max-width: 70px;
   }
 
   .ingredient-header {
-    min-width: 80px;
-    max-width: 100px;
+    min-width: 90px;
+    max-width: 120px;
   }
 
   .step-header {
-    min-width: 50px;
-    max-width: 60px;
+    min-width: 55px;
+    max-width: 70px;
   }
 }
 
@@ -360,13 +387,9 @@
     margin-right: 8px;
   }
 
-  /* Button responsive styles now handled by global .button classes */
-
-  /* .table-content max-height removed since overflow is now visible */
-
+  /* Ensure table maintains minimum width for horizontal scroll */
   .workflow-table {
-    min-width: 100%;
-    max-width: 100vw;
+    min-width: 550px; /* Slightly smaller but still readable */
   }
 
   .workflow-table table {
@@ -374,32 +397,32 @@
   }
 
   .workflow-table thead th {
-    padding: 4px 2px;
+    padding: 4px 3px;
     font-size: 8px;
   }
 
   .ingredient-cell {
     padding: 4px 3px;
     font-size: 8px;
-    min-width: 70px;
-    max-width: 80px;
+    min-width: 80px; /* Maintain readability */
+    max-width: 100px;
   }
 
   .step-cell {
-    padding: 4px 2px;
+    padding: 4px 3px;
     font-size: 7px;
-    min-width: 40px;
-    max-width: 50px;
+    min-width: 45px; /* Maintain readability */
+    max-width: 55px;
   }
 
   .ingredient-header {
-    min-width: 70px;
-    max-width: 80px;
+    min-width: 80px;
+    max-width: 100px;
   }
 
   .step-header {
-    min-width: 40px;
-    max-width: 50px;
+    min-width: 45px;
+    max-width: 55px;
   }
 }
 
