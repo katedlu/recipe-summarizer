@@ -3,6 +3,7 @@
   background-color: white;
   border-radius: 12px;
   max-width: 600px;
+  margin: 0 auto; /* Center the form horizontally */
   text-align: center;
 }
 
