@@ -58,9 +58,18 @@
 .recipe-form__help {
   margin-top: 8px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-color); /* Use main text color for better contrast */
   text-align: left;
   line-height: 1.4;
+}
+
+.recipe-form__error {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--error-color);
+  text-align: left;
+  line-height: 1.4;
+  font-weight: 600;
 }
 
 /* Screen reader only content */

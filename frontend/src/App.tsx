@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './styles/App.css';
 import RecipeForm from './components/RecipeForm';
 import RecipeCard from './components/RecipeCard';
@@ -13,6 +13,17 @@ const App: React.FC = () => {
   const [recipe, setRecipe] = React.useState<Recipe | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
+
+  // Update page title based on state
+  useEffect(() => {
+    if (recipe) {
+      document.title = `${recipe.title} - Recipeasy`;
+    } else if (loading) {
+      document.title = 'Parsing Recipe... - Recipeasy';
+    } else {
+      document.title = 'Recipeasy - Recipe Parser and Organizer';
+    }
+  }, [recipe, loading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +59,23 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
-      <a href="#main-content" className="skip-link">
+      <a 
+        href="#main-content" 
+        className="skip-link"
+        onClick={(e) => {
+          e.preventDefault();
+          const mainContent = document.getElementById('main-content');
+          if (mainContent) {
+            // Focus the main content first
+            mainContent.focus();
+            // Then focus the first interactive element (URL input)
+            const firstInput = mainContent.querySelector('input, button, select, textarea, [tabindex]') as HTMLElement;
+            if (firstInput) {
+              setTimeout(() => firstInput.focus(), 100);
+            }
+          }
+        }}
+      >
         Skip to main content
       </a>
       
@@ -57,7 +84,7 @@ const App: React.FC = () => {
         <h1 className="app-title">Recipeasy</h1>
       </header>
 
-      <main role="main" id="main-content">
+      <main role="main" id="main-content" tabIndex={-1}>
         <RecipeForm
           url={url}
           setUrl={setUrl}
