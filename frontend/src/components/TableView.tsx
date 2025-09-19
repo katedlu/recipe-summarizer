@@ -228,9 +228,6 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
   };
 
   const printToPDF = () => {
-    // Detect if we're on mobile
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
     // Get the table HTML
     const table = tableRef.current?.querySelector('table');
     if (!table) {
@@ -238,108 +235,14 @@ const TableView: React.FC<TableViewProps> = ({ rawJson }) => {
       return;
     }
 
-    if (isMobile) {
-      // For mobile: create a temporary div and print the current page
-      const originalContent = document.body.innerHTML;
-      const printContent = `
-        <div style="
-          font-family: 'DM Sans', Arial, sans-serif;
-          font-size: 12px;
-          line-height: 1.2;
-          margin: 10px;
-          padding: 0;
-        ">
-          <div style="
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #333;
-          ">${tableData?.title || 'Recipe Cooking Workflow'}</div>
-          <div style="
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-          ">
-            ${table.outerHTML}
-          </div>
-        </div>
-        <style>
-          @media print {
-            * {
-              visibility: visible !important;
-              color: #000 !important;
-              background: white !important;
-            }
-            
-            table {
-              width: 100% !important;
-              border-collapse: separate !important;
-              border-spacing: 0 !important;
-              page-break-inside: avoid !important;
-              font-size: 10px !important;
-            }
-            
-            th, td {
-              border: 2px solid #000 !important;
-              padding: 6px 4px !important;
-              vertical-align: middle !important;
-              word-wrap: break-word !important;
-              font-size: 9px !important;
-              line-height: 1.2 !important;
-              text-align: center !important;
-              background: white !important;
-              color: #000 !important;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-            
-            th {
-              background: #f0f0f0 !important;
-              font-weight: bold !important;
-              border: 2px solid #000 !important;
-              font-size: 10px !important;
-            }
-            
-            .ingredient-cell {
-              font-weight: 600 !important;
-              background: white !important;
-              border: 2px solid #000 !important;
-            }
-            
-            .step-cell {
-              background: white !important;
-              border: 2px solid #000 !important;
-            }
-            
-            .merged-cell {
-              background: #f8f8f8 !important;
-              font-weight: 600 !important;
-              border: 2px solid #000 !important;
-            }
-            
-            .prep-cell {
-              background: #e3f2fd !important;
-              font-weight: bold !important;
-              color: #1565c0 !important;
-              border: 2px solid #000 !important;
-            }
-          }
-        </style>
-      `;
-      
-      document.body.innerHTML = printContent;
-      window.print();
-      document.body.innerHTML = originalContent;
-      
-    } else {
-      // Desktop: use the existing popup window method
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        setError('Unable to open print window. Please check your browser settings.');
-        return;
-      }
+    // Always use the popup window method for consistent behavior
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      setError('Unable to open print window. Please check your browser settings.');
+      return;
+    }
 
-      const printDocument = `
+    const printDocument = `
         <!DOCTYPE html>
         <html>
         <head>
