@@ -21,6 +21,13 @@ body {
   margin: 0;
   padding: 0;
   line-height: 1.6;
+  overflow-x: hidden; /* Prevent horizontal scrolling on the page */
+}
+
+/* Prevent any element from causing horizontal overflow */
+* {
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 /* Ensure DM Sans is used throughout the entire application */
