@@ -17,19 +17,19 @@ const RecipeInfo: React.FC<RecipeInfoProps> = (props) => {
   const visibleBadges = useMemo(() => {
     const badgeConfigs: BadgeConfig[] = [
       {
-        renderCondition: props.prepTime !== undefined,
+        renderCondition: props.prepTime !== undefined && props.prepTime !== null,
         label: 'Prep Time',
         value: `${props.prepTime} minutes`,
         variant: 'prep-time',
       },
       {
-        renderCondition: props.cookTime !== undefined,
+        renderCondition: props.cookTime !== undefined && props.cookTime !== null,
         label: 'Cook Time',
         value: `${props.cookTime} minutes`,
         variant: 'cook-time',
       },
       {
-        renderCondition: props.totalTime !== undefined,
+        renderCondition: props.totalTime !== undefined && props.totalTime !== null,
         label: 'Total Time',
         value: `${props.totalTime} minutes`,
         variant: 'total-time',

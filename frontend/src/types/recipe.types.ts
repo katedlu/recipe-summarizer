@@ -38,6 +38,8 @@ export type Recipe = {
   yields?: string;
   image?: string;
   host?: string;
+  url?: string;
   raw_json?: any;
   table_data?: TableData;
+  warning?: string;
 };

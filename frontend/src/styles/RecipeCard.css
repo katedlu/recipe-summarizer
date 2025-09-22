@@ -31,6 +31,51 @@
   font-style: italic;
 }
 
+.recipe-card__source-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.recipe-card__source-link:hover,
+.recipe-card__source-link:focus {
+  color: var(--dark-color);
+  text-decoration: underline;
+  outline: 2px solid var(--dark-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.recipe-card__source-link:visited {
+  color: var(--primary-color);
+}
+
+/* Recipe Card Warning Styles */
+.recipe-card__warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  padding: 10px;
+  margin: 12px 0;
+  color: #856404;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.recipe-card__warning-icon {
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+
+.recipe-card__warning-text {
+  flex: 1;
+  margin: 0;
+}
+
 .recipe-card__content {
   display: grid;
   grid-template-columns: 1fr 1fr;

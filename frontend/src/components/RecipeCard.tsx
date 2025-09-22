@@ -27,7 +27,19 @@ const RecipeCard: React.FC<RecipeCardProps> = (props) => (
     {props.recipe.host && (
       <p className="recipe-card__source">
         <span className="sr-only">Recipe source: </span>
-        Source: {props.recipe.host}
+        Source: {props.recipe.url ? (
+          <a 
+            href={props.recipe.url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="recipe-card__source-link"
+            aria-label={`View original recipe on ${props.recipe.host}`}
+          >
+            {props.recipe.host}
+          </a>
+        ) : (
+          props.recipe.host
+        )}
       </p>
     )}
     <RecipeInfo 
@@ -36,6 +48,12 @@ const RecipeCard: React.FC<RecipeCardProps> = (props) => (
       totalTime={props.recipe.total_time}
       yields={props.recipe.yields}
     />
+    {props.recipe.warning && (
+      <div className="recipe-card__warning" role="alert" aria-live="polite">
+        <span className="recipe-card__warning-icon" aria-hidden="true">⚠️</span>
+        <span className="recipe-card__warning-text">{props.recipe.warning}</span>
+      </div>
+    )}
     <Equipment equipment={props.recipe.equipment || []} />
     <div className="recipe-card__content">
       <RecipeTable recipe={props.recipe} />

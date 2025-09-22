@@ -9,7 +9,9 @@ load_dotenv()
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from recipe_scrapers import scrape_me
+import requests
+from recipe_scrapers import scrape_me, WebsiteNotImplementedError, RecipeSchemaNotFound, NoSchemaFoundInWildMode, FieldNotProvidedByWebsiteException
+from recipe_scrapers._exceptions import SchemaOrgException, ElementNotFoundInHtml, OpenGraphException
 from urllib.parse import urlparse
 from llm_service import llm_service
 
@@ -17,45 +19,6 @@ from llm_service import llm_service
 DEPLOYMENT_ID = str(uuid.uuid4())[:8]  # Short UUID for readability
 DEPLOYMENT_TIME = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 VERSION = "1.0.0"  # You can update this manually when making major changes
-
-def format_recipe_scraper_error(error_message: str, url: str) -> str:
-    """
-    Format recipe-scrapers errors into user-friendly messages
-    """
-    error_lower = error_message.lower()
-    
-    # Extract domain from URL
-    try:
-        domain = urlparse(url).netloc
-        if domain.startswith('www.'):
-            domain = domain[4:]
-    except:
-        domain = "this website"
-    
-    # Check for common recipe-scrapers error patterns
-    if "preptime information not found in schemaorg" in error_lower:
-        return f"Sorry, we do not support scraping this website domain: {domain}"
-    elif "cooktime information not found in schemaorg" in error_lower:
-        return f"Sorry, we do not support scraping this website domain: {domain}"
-    elif "totaltime information not found in schemaorg" in error_lower:
-        return f"Sorry, we do not support scraping this website domain: {domain}"
-    elif "recipe information not found" in error_lower:
-        return f"Sorry, we do not support scraping this website domain: {domain}"
-    elif "schema.org" in error_lower and "not found" in error_lower:
-        return f"Sorry, we do not support scraping this website domain: {domain}"
-    elif "no recipe found" in error_lower:
-        return f"Sorry, no recipe was found on this page from {domain}"
-    elif "unsupported domain" in error_lower or "not supported" in error_lower:
-        return f"Sorry, we do not support scraping this website domain: {domain}"
-    elif "connection" in error_lower or "timeout" in error_lower:
-        return f"Unable to connect to {domain}. Please check the URL and try again."
-    elif "404" in error_message or "not found" in error_lower:
-        return f"The recipe page was not found at {domain}. Please check the URL."
-    elif "403" in error_message or "forbidden" in error_lower:
-        return f"Access to {domain} was denied. The website may be blocking automated requests."
-    else:
-        # For other errors, provide a generic but helpful message
-        return f"Sorry, we encountered an issue while trying to scrape the recipe from {domain}. This website may not be supported or the page format may have changed."
 
 def has_meaningful_ingredient_groups(ingredient_groups):
     """
@@ -99,6 +62,49 @@ def has_meaningful_ingredient_groups(ingredient_groups):
     
     # Need at least 2 meaningful groups to justify a group column
     return meaningful_groups >= 2
+
+def detect_paywall(url):
+    """
+    Detect if a URL is behind a paywall by checking the HTML content
+    """
+    try:
+        response = requests.get(url, timeout=10, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        })
+        
+        if response.status_code != 200:
+            return False, f"HTTP {response.status_code}"
+            
+        content = response.text.lower()
+        
+        # Common paywall indicators
+        paywall_indicators = [
+            'paywall', 'subscribe to continue', 'subscription required', 
+            'premium content', 'member exclusive', 'sign up to read',
+            'login to continue', 'create a free account', 'become a member',
+            'subscribe now', 'limited free articles', 'subscriber exclusive'
+        ]
+        
+        # NYTimes specific indicators
+        nytimes_indicators = [
+            'cooking.nytimes.com/recipes' in url.lower() and any(indicator in content for indicator in [
+                'subscribe', 'subscription', 'create your free account', 'sign up'
+            ])
+        ]
+        
+        # Check for indicators
+        found_indicators = []
+        for indicator in paywall_indicators:
+            if indicator in content:
+                found_indicators.append(indicator)
+                
+        if found_indicators or any(nytimes_indicators):
+            return True, found_indicators[:3]  # Return first 3 indicators
+            
+        return False, None
+        
+    except requests.RequestException as e:
+        return False, f"Request error: {str(e)}"
 
 app = Flask(__name__)
 CORS(app)
@@ -144,6 +150,7 @@ def parse_recipe(url):
             'yields': scraper.yields() or None,
             'image': scraper.image() or None,
             'host': scraper.host() or None,
+            'url': url,
             'raw_json': raw_json
         }
         
@@ -153,10 +160,136 @@ def parse_recipe(url):
 
         return recipe_data
         
+    except WebsiteNotImplementedError as e:
+        # This is a legitimate "domain not supported" error
+        raise Exception(f"Domain not supported: The website '{urlparse(url).netloc}' is not supported by the recipe parser.")
+    
+    except (RecipeSchemaNotFound, NoSchemaFoundInWildMode) as e:
+        # No recipe schema found - check if it's a paywall issue
+        is_paywall, paywall_info = detect_paywall(url)
+        domain = urlparse(url).netloc
+        
+        if is_paywall:
+            raise Exception(f"Paywall detected: The recipe at {domain} appears to be behind a paywall or requires subscription access. Please ensure you have access to view the full recipe content.")
+        else:
+            raise Exception(f"No recipe found: Unable to find recipe data on this page. The page may not contain a recipe or the recipe format is not recognized.")
+    
+    except SchemaOrgException as e:
+        # Missing specific schema.org fields - could be paywall or parsing issue
+        error_details = str(e).lower()
+        is_paywall, paywall_info = detect_paywall(url)
+        domain = urlparse(url).netloc
+        
+        if is_paywall:
+            raise Exception(f"Paywall detected: The recipe at {domain} appears to be behind a paywall.")
+        else:
+            # This is likely just missing optional fields like timing - try to get partial recipe data
+            try:
+                print(f"DEBUG: SchemaOrgException for optional fields, attempting partial parsing...")
+                scraper = scrape_me(url)
+                
+                # Get what we can, ignoring missing timing fields
+                recipe_data = {
+                    'title': scraper.title() or 'Unknown Recipe',
+                    'ingredients': scraper.ingredients() or [],
+                    'instructions': scraper.instructions_list() or [],
+                    'yields': scraper.yields() or None,
+                    'image': scraper.image() or None,
+                    'host': scraper.host() or None,
+                    'url': url,
+                    'warning': f"Some timing details like cook time or prep time may be missing from this recipe. This recipe is shown as originally found on {domain}."
+                }
+                
+                # Try to get optional fields safely
+                try:
+                    recipe_data['total_time'] = scraper.total_time()
+                except:
+                    recipe_data['total_time'] = None
+                    
+                try:
+                    recipe_data['prep_time'] = scraper.prep_time()
+                except:
+                    recipe_data['prep_time'] = None
+                    
+                try:
+                    recipe_data['cook_time'] = scraper.cook_time()
+                except:
+                    recipe_data['cook_time'] = None
+                
+                # Try to get equipment safely
+                try:
+                    equipment = scraper.equipment() or []
+                    recipe_data['equipment'] = equipment
+                except:
+                    recipe_data['equipment'] = []
+                
+                # Try to get ingredient groups safely
+                try:
+                    ingredient_groups = scraper.ingredient_groups() or []
+                    if has_meaningful_ingredient_groups(ingredient_groups):
+                        recipe_data['ingredient_groups'] = ingredient_groups
+                except:
+                    pass
+                
+                # Try to get raw JSON safely
+                try:
+                    recipe_data['raw_json'] = scraper.to_json()
+                except:
+                    recipe_data['raw_json'] = None
+                
+                print(f"DEBUG: Successfully parsed partial recipe data")
+                return recipe_data
+                
+            except Exception as parse_error:
+                print(f"DEBUG: Failed to parse partial recipe: {parse_error}")
+                raise Exception(f"Recipe parsing incomplete: Found recipe data but some timing information (cook time, prep time) is missing from {domain}. The recipe should still be usable.")
+    
+    except (ElementNotFoundInHtml, OpenGraphException) as e:
+        # HTML structure issues - check for paywall
+        is_paywall, paywall_info = detect_paywall(url)
+        domain = urlparse(url).netloc
+        
+        if is_paywall:
+            raise Exception(f"Paywall detected: The recipe at {domain} appears to be behind a subscription paywall. Please log in to your account or check if you have access to this content.")
+        else:
+            raise Exception(f"Page structure issue: The recipe page structure at {domain} is not recognized. The website may have changed its format or this page may not contain a recipe.")
+    
+    except FieldNotProvidedByWebsiteException as e:
+        # Missing specific fields but recipe was found
+        raise Exception(f"Recipe parsing incomplete: Found recipe data but some information is missing. The recipe may still be usable with limited details.")
+    
     except Exception as e:
-        # Format the error message for better user experience
-        formatted_error = format_recipe_scraper_error(str(e), url)
-        raise Exception(formatted_error)
+        # Catch-all for other unexpected errors (network, parsing, etc.)
+        error_msg = str(e).lower()
+        domain = urlparse(url).netloc
+        
+        # Log the actual error for debugging
+        print(f"DEBUG: Unexpected error parsing {url}: {str(e)}")
+        print(f"DEBUG: Error type: {type(e).__name__}")
+        
+        # Network and connection issues
+        if "timeout" in error_msg or "connection" in error_msg or "network" in error_msg:
+            raise Exception(f"Network error: Unable to access {domain}. Please check your internet connection and try again.")
+        elif "ssl" in error_msg or "certificate" in error_msg:
+            raise Exception(f"SSL/Certificate error: Unable to establish a secure connection to {domain}. The website may have certificate issues.")
+        elif "forbidden" in error_msg or "403" in error_msg:
+            raise Exception(f"Access denied: {domain} is blocking automated requests. Try copying the recipe content manually.")
+        elif "unauthorized" in error_msg or "401" in error_msg:
+            raise Exception(f"Authentication required: {domain} requires login to access this recipe.")
+        elif "not found" in error_msg or "404" in error_msg:
+            raise Exception(f"Recipe page not found: The specific recipe page at {domain} could not be found. The URL may be incorrect or the recipe may have been moved.")
+        elif "500" in error_msg or "server error" in error_msg:
+            raise Exception(f"Website error: {domain} is experiencing technical difficulties. Please try again later.")
+        elif "rate limit" in error_msg or "too many requests" in error_msg:
+            raise Exception(f"Rate limited: Too many requests to {domain}. Please wait a moment and try again.")
+        # Parsing-specific issues
+        elif "html" in error_msg and ("empty" in error_msg or "no content" in error_msg):
+            raise Exception(f"Empty page: The webpage at {domain} appears to be empty or has no content to parse.")
+        elif "redirect" in error_msg or "moved" in error_msg:
+            raise Exception(f"Page redirect: The recipe page has moved. Please check for the updated URL on {domain}.")
+        else:
+            # For any other unexpected errors, provide detailed information for debugging
+            raise Exception(f"Recipe parsing failed: Unable to extract recipe data from {domain}. This could be due to the page structure not being recognized or missing recipe data. Technical details: {str(e)}")
 
 @app.route('/')
 def index():
